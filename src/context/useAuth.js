@@ -1,12 +1,13 @@
-import { useCallback, useState } from "react";
+import { useContext } from "react";
+import { AuthContext } from "./AuthContext";
 
 function useAuth() {
-  const [user, setUser] = useState(null);
+  const context = useContext(AuthContext);
 
-  const login = useCallback((userData) => setUser(userData), []);
-  const logout = useCallback(() => setUser(null), []);
-
-  return { user, login, logout };
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }
 
 export default useAuth;

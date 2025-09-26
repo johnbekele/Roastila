@@ -3,10 +3,7 @@ const { getDefaultConfig } = require("expo/metro-config");
 
 const config = getDefaultConfig(__dirname);
 
-// Use the correct transformer path
-config.transformer.babelTransformerPath = require.resolve(
-  "react-native-css-interop/metro/transformer"
-);
+// NativeWind v2 configuration
 config.resolver.sourceExts.push("css");
 
 module.exports = config;

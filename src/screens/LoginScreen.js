@@ -5,7 +5,6 @@ import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Button,
   Text,
   TextInput,
   TouchableOpacity,
@@ -47,65 +46,104 @@ export default function LoginScreen({ navigation }) {
       });
       const data = await res.json();
       setUserInfo(data);
-      navigation.replace("Home"); // go to Home after Google login
+      navigation.replace("Home");
     } catch (err) {
       setError(err.message);
     }
   };
 
+  const handleEmailLogin = async () => {
+    if (!email || !password) {
+      setError("Please enter both email and password");
+      return;
+    }
+    setError(null);
+    console.log("email", email);
+    console.log("password", password);
+    await login(email, password);
+  };
+
   return (
-    <View className="flex-1 justify-center items-center p-6 bg-white">
-      {/* Logo */}
-      <View className="mb-10 items-center">
-        <Text className="text-4xl font-bold">Roastila ☕</Text>
+    <View className="flex-1 justify-center px-6 bg-white">
+      {/* Logo Section */}
+      <View className="items-center mb-10">
+        <Text className="text-4xl font-bold text-gray-800 mb-2">
+          Roastila ☕
+        </Text>
+        <Text className="text-lg text-gray-600">Welcome back!</Text>
         {loading && (
-          <ActivityIndicator size="large" color="#333" className="mt-4" />
+          <ActivityIndicator size="large" color="#3b82f6" className="mt-4" />
         )}
       </View>
 
-      {/* Inputs */}
-      <TextInput
-        className="w-full border border-gray-300 rounded-lg p-3 mb-4"
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        className="w-full border border-gray-300 rounded-lg p-3 mb-4"
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+      {/* Error Message */}
+      {error && (
+        <View className="bg-red-100 border border-red-400 rounded-lg p-3 mb-4">
+          <Text className="text-red-700 text-center">{error}</Text>
+        </View>
+      )}
 
-      {/* Error */}
-      {error && <Text className="text-red-500 mb-2">{error}</Text>}
+      {/* Input Fields */}
+      <View className="space-y-4">
+        <TextInput
+          className="w-full border border-gray-300 rounded-xl p-4 text-base bg-gray-50"
+          placeholder="Email address"
+          placeholderTextColor="#9ca3af"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+        />
 
-      {/* Email/Password Login */}
-      <Button
-        title="Login"
-        onPress={() => login(email, password)}
-        disabled={loading}
-      />
-
-      {/* Google Login */}
-      <View className="mt-4">
-        <Button
-          disabled={!request}
-          title="Sign in with Google"
-          onPress={() => promptAsync()}
+        <TextInput
+          className="w-full border border-gray-300 rounded-xl p-4 text-base bg-gray-50"
+          placeholder="Password"
+          placeholderTextColor="#9ca3af"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoComplete="password"
         />
       </View>
 
-      {/* Links */}
-      <View className="flex-row mt-4">
+      {/* Login Button */}
+      <TouchableOpacity
+        className="bg-blue-500 rounded-xl p-4 mt-6"
+        onPress={handleEmailLogin}
+        disabled={loading}
+      >
+        <Text className="text-white text-center font-semibold text-lg">
+          {loading ? "Signing in..." : "Sign In"}
+        </Text>
+      </TouchableOpacity>
+
+      {/* Divider */}
+      <View className="flex-row items-center my-6">
+        <View className="flex-1 h-px bg-gray-300" />
+        <Text className="mx-4 text-gray-500">or</Text>
+        <View className="flex-1 h-px bg-gray-300" />
+      </View>
+
+      {/* Google Sign In */}
+      <TouchableOpacity
+        className="border border-gray-300 rounded-xl p-4 flex-row justify-center items-center"
+        disabled={!request || loading}
+        onPress={() => promptAsync()}
+      >
+        <Text className="text-gray-700 font-semibold text-lg ml-2">
+          Sign in with Google
+        </Text>
+      </TouchableOpacity>
+
+      {/* Links Section */}
+      <View className="flex-row justify-center space-x-6 mt-8">
         <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-          <Text className="text-blue-500 mr-4">Register</Text>
+          <Text className="text-blue-500 font-medium">Create Account</Text>
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => navigation.navigate("ResetPassword")}>
-          <Text className="text-blue-500">Forgot Password?</Text>
+          <Text className="text-blue-500 font-medium">Forgot Password?</Text>
         </TouchableOpacity>
       </View>
     </View>
