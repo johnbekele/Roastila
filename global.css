@@ -1,8 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Fix for safe area conflicts */
-.safe-area-fix {
-  @apply flex-1;
-}
