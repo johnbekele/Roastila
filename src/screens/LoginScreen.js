@@ -15,9 +15,9 @@ import { useAuth } from "../hooks/useAuth";
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen({ navigation }) {
-  const { login, loading } = useAuth();
+  const { login, loading, error } = useAuth();
   const [userInfo, setUserInfo] = useState(null);
-  const [error, setError] = useState(null);
+  const [localError, setLocalError] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -35,7 +35,7 @@ export default function LoginScreen({ navigation }) {
       const { authentication } = response;
       fetchUserInfo(authentication.accessToken);
     } else if (response?.type === "error") {
-      setError(response.error);
+      setLocalError(response.error);
     }
   }, [response]);
 
@@ -46,22 +46,34 @@ export default function LoginScreen({ navigation }) {
       });
       const data = await res.json();
       setUserInfo(data);
-      navigation.replace("Home");
+      navigation.replace("Main");
     } catch (err) {
-      setError(err.message);
+      setLocalError(err.message);
     }
   };
 
   const handleEmailLogin = async () => {
     if (!email || !password) {
-      setError("Please enter both email and password");
+      setLocalError("Please enter both email and password");
       return;
     }
-    setError(null);
-    console.log("email", email);
-    console.log("password", password);
-    await login(email, password);
+    setLocalError(null);
+    console.log("📧 [LOGIN] Email:", email);
+    console.log("🔑 [LOGIN] Password:", password);
+
+    const result = await login(email, password);
+
+    if (result.success) {
+      console.log("✅ [LOGIN] Login successful, navigating to Main");
+      navigation.replace("Main");
+    } else {
+      console.log("❌ [LOGIN] Login failed:", result.error);
+      setLocalError(result.error);
+    }
   };
+
+  // Use local error state for display
+  const displayError = localError || error;
 
   return (
     <View className="flex-1 justify-center px-6 bg-white">
@@ -77,9 +89,9 @@ export default function LoginScreen({ navigation }) {
       </View>
 
       {/* Error Message */}
-      {error && (
+      {displayError && (
         <View className="bg-red-100 border border-red-400 rounded-lg p-3 mb-4">
-          <Text className="text-red-700 text-center">{error}</Text>
+          <Text className="text-red-700 text-center">{displayError}</Text>
         </View>
       )}
 
