@@ -4,6 +4,7 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useAuth } from "../hooks/useAuth";
 
 // Navigators
+import ProfileScreen from "../screens/ProfileScreen";
 import TabNavigator from "./TabNavigator";
 
 const Drawer = createDrawerNavigator();
@@ -14,7 +15,7 @@ function CustomDrawerContent({ navigation }) {
 
   const menuItems = [
     { id: 1, title: "Home", icon: "🏠", screen: "Tabs" },
-    { id: 2, title: "Profile", icon: "👤", screen: "Tabs" },
+    { id: 2, title: "Profile", icon: "👤", screen: "Profile" },
     { id: 3, title: "Settings", icon: "⚙️", screen: "Settings" },
     { id: 4, title: "Notifications", icon: "🔔", screen: "Notifications" },
     { id: 5, title: "Help & Support", icon: "❓", screen: "Help" },
@@ -36,10 +37,10 @@ function CustomDrawerContent({ navigation }) {
           </View>
           <View>
             <Text className="text-white text-lg font-bold">
-              {user?.userInfo?.name || "User"}
+              {user?.username || "User"}
             </Text>
             <Text className="text-blue-100 text-sm">
-              {user?.userInfo?.email || "user@example.com"}
+              {user?.email || "user@example.com"}
             </Text>
           </View>
         </View>
@@ -55,8 +56,7 @@ function CustomDrawerContent({ navigation }) {
               if (item.screen === "Tabs") {
                 navigation.navigate("Tabs");
               } else {
-                // For now, just show an alert for unimplemented screens
-                alert(`${item.title} screen coming soon!`);
+                navigation.navigate(item.screen);
               }
               navigation.closeDrawer();
             }}
@@ -95,6 +95,7 @@ function DrawerNavigator() {
       }}
     >
       <Drawer.Screen name="Tabs" component={TabNavigator} />
+      <Drawer.Screen name="Profile" component={ProfileScreen} />
     </Drawer.Navigator>
   );
 }

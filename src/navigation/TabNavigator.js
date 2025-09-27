@@ -18,7 +18,10 @@ function CustomHeader({ navigation }) {
   return (
     <SafeAreaView edges={["top"]} className="bg-white">
       <View className="border-b border-gray-200 px-4 py-3 flex-row items-center justify-between">
-        <Text className="text-xl font-bold text-gray-800">Roastila ☕</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text className="text-xl font-bold text-gray-800">Roastila ☕</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           onPress={() => navigation.openDrawer()}
           className="w-10 h-10 bg-blue-500 rounded-full items-center justify-center"
