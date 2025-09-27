@@ -2,7 +2,7 @@
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useAuth } from "../hooks/useAuth";
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
 
   const quickActions = [
@@ -11,34 +11,55 @@ export default function HomeScreen() {
       subtitle: "Explore Ethiopian varieties",
       icon: "☕",
       color: "bg-amber-500",
+      action: "side", // Side navigation
+      screen: "SideNavigator",
+      params: { screen: "BrowseCoffee" },
     },
     {
       title: "Find Producers",
       subtitle: "Connect with farmers",
       icon: "🌍",
       color: "bg-green-500",
+      action: "side", // Side navigation
+      screen: "SideNavigator",
+      params: { screen: "FindProducers" },
     },
     {
       title: "Place Order",
       subtitle: "Start new trade",
       icon: "📦",
       color: "bg-blue-500",
+      action: "bottom", // Bottom navigation
+      screen: "BottomNavigator",
+      params: { screen: "PlaceOrder" },
     },
     {
       title: "Track Shipment",
       subtitle: "Monitor logistics",
       icon: "🚚",
       color: "bg-purple-500",
+      action: "bottom", // Bottom navigation
+      screen: "BottomNavigator",
+      params: { screen: "TrackShipment" },
     },
   ];
 
-  const recentActivities = [
+  const userName =
+    user?.first_name || user?.username || user?.email || "Partner";
+
+  const marketStats = [
+    { label: "Ethiopian Export", value: "€2.1M", change: "+12%", icon: "📈" },
+    { label: "Polish Import", value: "€1.8M", change: "+8%", icon: "📊" },
+    { label: "Active Orders", value: "47", change: "+5%", icon: "📦" },
+    { label: "Verified Producers", value: "156", change: "+3%", icon: "✅" },
+  ];
+
+  const recentActivity = [
     {
       id: 1,
-      title: "New Order from Yirgacheffe",
-      subtitle: "2.5 tons - Grade 1",
-      time: "2 hours ago",
       icon: "📦",
+      text: "Order #ROA2024-001 confirmed",
+      time: "2 hours ago",
       status: "Processing",
     },
     {
@@ -67,58 +88,46 @@ export default function HomeScreen() {
     },
   ];
 
-  const marketInsights = [
-    { label: "Ethiopian Export", value: "€2.1M", change: "+12%" },
-    { label: "Polish Import", value: "€1.8M", change: "+8%" },
-    { label: "Active Orders", value: "47", change: "+5%" },
-    { label: "Verified Producers", value: "156", change: "+3%" },
-  ];
-
   return (
     <ScrollView className="flex-1 bg-gray-50">
       <View className="p-6">
         {/* Welcome Section */}
-        <View className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-6 mb-6">
-          <View className="flex-row items-center justify-between">
-            <View className="flex-1">
-              <Text className="text-2xl font-bold text-white mb-2">
-                Welcome back! 👋
-              </Text>
-              <Text className="text-amber-100 text-base mb-3">
-                {user?.first_name || user?.username || "Coffee Professional"},
-                ready to trade?
-              </Text>
-              <Text className="text-amber-200 text-sm">
-                Connecting Ethiopia to Poland since 2024
-              </Text>
-            </View>
-            <View className="w-16 h-16 bg-white/20 rounded-full items-center justify-center">
-              <Text className="text-3xl">☕</Text>
-            </View>
-          </View>
+        <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
+          <Text className="text-2xl font-bold text-gray-800 mb-2">
+            Welcome, {userName}! 👋
+          </Text>
+          <Text className="text-gray-600">
+            Your B2B coffee trading dashboard.
+          </Text>
         </View>
 
-        {/* Market Insights */}
+        {/* Market Overview */}
         <View className="mb-6">
-          <Text className="text-lg font-semibold text-gray-800 mb-4">
-            Market Insights
+          <Text className="text-lg font-bold text-gray-800 mb-4">
+            Market Overview
           </Text>
-          <View className="bg-white rounded-2xl p-4 shadow-sm">
-            <View className="flex-row flex-wrap justify-between">
-              {marketInsights.map((insight, index) => (
-                <View key={index} className="w-1/2 mb-4">
-                  <Text className="text-2xl font-bold text-amber-600">
-                    {insight.value}
-                  </Text>
-                  <Text className="text-sm text-gray-600 mb-1">
-                    {insight.label}
-                  </Text>
-                  <Text className="text-xs text-green-600 font-medium">
-                    {insight.change} this month
-                  </Text>
-                </View>
-              ))}
-            </View>
+          <View className="flex-row flex-wrap justify-between">
+            {marketStats.map((stat, index) => (
+              <View
+                key={index}
+                className="bg-white rounded-xl p-4 mb-3 w-[48%] shadow-sm"
+              >
+                <Text className="text-xl mb-1">{stat.icon}</Text>
+                <Text className="text-sm text-gray-600">{stat.label}</Text>
+                <Text className="text-xl font-bold text-gray-800">
+                  {stat.value}
+                </Text>
+                <Text
+                  className={`text-xs font-semibold ${
+                    stat.change.startsWith("+")
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }`}
+                >
+                  {stat.change}
+                </Text>
+              </View>
+            ))}
           </View>
         </View>
 
@@ -131,45 +140,76 @@ export default function HomeScreen() {
             {quickActions.map((action, index) => (
               <TouchableOpacity
                 key={index}
-                className={`${action.color} rounded-xl p-4 flex-1 min-w-[150px]`}
+                className={`${action.color} rounded-xl p-4 flex-1 min-w-[150px] active:opacity-80`}
+                onPress={() =>
+                  navigation.navigate(action.screen, action.params)
+                }
               >
                 <Text className="text-white text-2xl mb-2">{action.icon}</Text>
                 <Text className="text-white font-semibold text-base mb-1">
                   {action.title}
                 </Text>
                 <Text className="text-white/80 text-sm">{action.subtitle}</Text>
+                <View className="mt-2">
+                  <Text className="text-white/60 text-xs">
+                    {action.action === "side"
+                      ? "→ Slide from side"
+                      : "↑ Slide from bottom"}
+                  </Text>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
         {/* Recent Activities */}
-        <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
+        <View className="mb-6">
           <Text className="text-lg font-semibold text-gray-800 mb-4">
-            Recent Activities
+            Recent Activity
           </Text>
-          <View className="space-y-4">
-            {recentActivities.map((activity) => (
-              <View key={activity.id} className="flex-row items-center py-2">
-                <View className="w-12 h-12 bg-gray-100 rounded-full items-center justify-center mr-4">
-                  <Text className="text-xl">{activity.icon}</Text>
-                </View>
+          <View className="bg-white rounded-xl p-4 shadow-sm">
+            {recentActivity.map((activity) => (
+              <View
+                key={activity.id}
+                className="flex-row items-center py-3 border-b border-gray-100 last:border-b-0"
+              >
+                <Text className="text-2xl mr-3">{activity.icon}</Text>
                 <View className="flex-1">
-                  <Text className="text-gray-800 font-medium text-base">
-                    {activity.title}
+                  <Text className="text-gray-800 font-medium">
+                    {activity.text || activity.title}
                   </Text>
-                  <Text className="text-gray-500 text-sm mb-1">
-                    {activity.subtitle}
-                  </Text>
-                  <View className="flex-row items-center justify-between">
-                    <Text className="text-gray-400 text-xs">
-                      {activity.time}
+                  {activity.subtitle && (
+                    <Text className="text-gray-500 text-sm">
+                      {activity.subtitle}
                     </Text>
-                    <View className="bg-green-100 px-2 py-1 rounded-full">
-                      <Text className="text-green-700 text-xs font-medium">
-                        {activity.status}
-                      </Text>
-                    </View>
+                  )}
+                  <Text className="text-gray-500 text-sm">{activity.time}</Text>
+                </View>
+                <View className="items-end">
+                  <View
+                    className={`px-2 py-1 rounded-full ${
+                      activity.status === "Completed"
+                        ? "bg-green-100"
+                        : activity.status === "Processing"
+                          ? "bg-yellow-100"
+                          : activity.status === "Confirmed"
+                            ? "bg-blue-100"
+                            : "bg-gray-100"
+                    }`}
+                  >
+                    <Text
+                      className={`text-xs font-medium ${
+                        activity.status === "Completed"
+                          ? "text-green-700"
+                          : activity.status === "Processing"
+                            ? "text-yellow-700"
+                            : activity.status === "Confirmed"
+                              ? "text-blue-700"
+                              : "text-gray-700"
+                      }`}
+                    >
+                      {activity.status}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -177,36 +217,18 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Platform Features */}
-        <View className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6">
+        {/* Quick Tips */}
+        <View className="mb-6">
           <Text className="text-lg font-semibold text-gray-800 mb-4">
-            🌍 Platform Features
+            Quick Tips
           </Text>
-          <View className="space-y-3">
-            <View className="flex-row items-center">
-              <Text className="text-2xl mr-3">✅</Text>
-              <Text className="text-gray-700 text-sm flex-1">
-                Verified Ethiopian coffee producers
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Text className="text-2xl mr-3">📊</Text>
-              <Text className="text-gray-700 text-sm flex-1">
-                Quality reports and certifications
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Text className="text-2xl mr-3">🚚</Text>
-              <Text className="text-gray-700 text-sm flex-1">
-                Streamlined logistics and shipping
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Text className="text-2xl mr-3">💳</Text>
-              <Text className="text-gray-700 text-sm flex-1">
-                Secure payment processing
-              </Text>
-            </View>
+          <View className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200">
+            <Text className="text-amber-800 font-medium mb-2">💡 Pro Tip</Text>
+            <Text className="text-amber-700 text-sm">
+              Use the quick actions above to navigate to different sections.
+              Side actions slide in from the left, while bottom actions slide up
+              from below.
+            </Text>
           </View>
         </View>
       </View>

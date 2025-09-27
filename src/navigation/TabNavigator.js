@@ -8,6 +8,7 @@ import { useAuth } from "../hooks/useAuth";
 import ChatScreen from "../screens/ChatScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import BrowseCoffeTab from "../tabs/BrowseCoffeTab";
 
 const Tab = createBottomTabNavigator();
 
@@ -75,6 +76,26 @@ function TabNavigator() {
               className={`text-xl ${focused ? "text-blue-500" : "text-gray-500"}`}
             >
               🏠
+            </Text>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Browse"
+        component={BrowseCoffeTab}
+        options={{
+          tabBarLabel: ({ focused }) => (
+            <Text
+              className={`text-xs font-semibold ${focused ? "text-blue-500" : "text-gray-500"}`}
+            >
+              Browse
+            </Text>
+          ),
+          tabBarIcon: ({ focused }) => (
+            <Text
+              className={`text-xl ${focused ? "text-blue-500" : "text-gray-500"}`}
+            >
+              ☕
             </Text>
           ),
         }}

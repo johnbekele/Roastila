@@ -5,6 +5,8 @@ import { useAuth } from "../hooks/useAuth";
 
 // Navigators
 import ProfileScreen from "../screens/ProfileScreen";
+import BottomNavigator from "./BottomNavigator";
+import SideNavigator from "./SideNavigator";
 import TabNavigator from "./TabNavigator";
 
 const Drawer = createDrawerNavigator();
@@ -96,6 +98,20 @@ function DrawerNavigator() {
     >
       <Drawer.Screen name="Tabs" component={TabNavigator} />
       <Drawer.Screen name="Profile" component={ProfileScreen} />
+      <Drawer.Screen
+        name="SideNavigator"
+        component={SideNavigator}
+        options={{
+          drawerItemStyle: { display: "none" }, // Hide from drawer menu
+        }}
+      />
+      <Drawer.Screen
+        name="BottomNavigator"
+        component={BottomNavigator}
+        options={{
+          drawerItemStyle: { display: "none" }, // Hide from drawer menu
+        }}
+      />
     </Drawer.Navigator>
   );
 }
