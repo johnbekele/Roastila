@@ -9,16 +9,26 @@ export default function ProfileScreen() {
     <View className="flex-1 justify-center items-center bg-white px-6">
       <Text className="text-3xl font-bold text-gray-800 mb-6">Profile</Text>
 
-      {user?.userInfo && (
+      {(user?.userInfo || user?.email) && (
         <View className="bg-gray-100 rounded-xl p-4 mb-6 w-full">
           <Text className="text-lg font-semibold text-gray-700 mb-2">
             User Info:
           </Text>
           <Text className="text-gray-600">
-            Email: {user.userInfo.email || "N/A"}
+            Email: {user?.email || user?.userInfo?.email || "N/A"}
           </Text>
           <Text className="text-gray-600">
-            Name: {user.userInfo.name || "N/A"}
+            Username: {user?.username || user?.userInfo?.username || "N/A"}
+          </Text>
+          <Text className="text-gray-600">
+            First Name:{" "}
+            {user?.first_name || user?.userInfo?.first_name || "N/A"}
+          </Text>
+          <Text className="text-gray-600">
+            Last Name: {user?.last_name || user?.userInfo?.last_name || "N/A"}
+          </Text>
+          <Text className="text-gray-600">
+            ID: {user?.id || user?.userInfo?.id || "N/A"}
           </Text>
         </View>
       )}

@@ -6,7 +6,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import "./global.css";
 
-import { AuthProvider } from "./src/context/AuthContext";
+import { AuthProvider } from "./src/hooks/AuthContext";
 import AppNavigator from "./src/navigation/AppNavigator";
 import SplashScreen from "./src/screens/SplashScreen";
 

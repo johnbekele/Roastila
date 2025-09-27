@@ -37,7 +37,7 @@ export default function LoginScreen({ navigation }) {
     } else if (response?.type === "error") {
       setLocalError(response.error);
     }
-  }, [response]);
+  }, [fetchUserInfo, response]);
 
   const fetchUserInfo = async (token) => {
     try {
@@ -64,8 +64,8 @@ export default function LoginScreen({ navigation }) {
     const result = await login(email, password);
 
     if (result.success) {
-      console.log("✅ [LOGIN] Login successful, navigating to Main");
-      navigation.replace("Main");
+      console.log("✅ [LOGIN] Login successful, navigating to Tabs");
+      navigation.replace("Tabs");
     } else {
       console.log("❌ [LOGIN] Login failed:", result.error);
       setLocalError(result.error);

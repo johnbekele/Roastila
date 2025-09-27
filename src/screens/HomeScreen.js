@@ -5,6 +5,10 @@ import { useAuth } from "../hooks/useAuth";
 export default function HomeScreen() {
   const { user } = useAuth();
 
+  console.log("Full User Object:", user);
+  console.log("User Info from home screen:", user?.userInfo);
+  console.log("Available fields:", user ? Object.keys(user) : "No user");
+
   return (
     <ScrollView className="flex-1 bg-gray-50">
       <View className="p-6">
@@ -14,7 +18,8 @@ export default function HomeScreen() {
             Welcome back! 👋
           </Text>
           <Text className="text-gray-600">
-            {user?.userInfo?.name || "User"}, ready to start your day?
+            {user?.first_name || user?.username || user?.email || "User"}, ready
+            to start your day?
           </Text>
         </View>
 
@@ -24,7 +29,10 @@ export default function HomeScreen() {
             Quick Actions
           </Text>
           <View className="flex-row flex-wrap gap-3">
-            <TouchableOpacity className="bg-blue-500 rounded-xl p-4 flex-1 min-w-[150px]">
+            <TouchableOpacity
+              onPress={() => console.log(user)}
+              className="bg-blue-500 rounded-xl p-4 flex-1 min-w-[150px]"
+            >
               <Text className="text-white text-center font-semibold">
                 ☕ New Order
               </Text>

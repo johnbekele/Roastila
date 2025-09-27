@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 // Context
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../hooks/AuthContext";
 
 // Navigators
 import DrawerNavigator from "./DrawerNavigator";

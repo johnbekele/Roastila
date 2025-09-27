@@ -13,8 +13,8 @@ function CustomDrawerContent({ navigation }) {
   const { logout, user } = useAuth();
 
   const menuItems = [
-    { id: 1, title: "Home", icon: "🏠", screen: "Main" },
-    { id: 2, title: "Profile", icon: "👤", screen: "Main" },
+    { id: 1, title: "Home", icon: "🏠", screen: "Tabs" },
+    { id: 2, title: "Profile", icon: "👤", screen: "Tabs" },
     { id: 3, title: "Settings", icon: "⚙️", screen: "Settings" },
     { id: 4, title: "Notifications", icon: "🔔", screen: "Notifications" },
     { id: 5, title: "Help & Support", icon: "❓", screen: "Help" },
@@ -52,8 +52,8 @@ function CustomDrawerContent({ navigation }) {
             key={item.id}
             className="flex-row items-center py-4 px-3 rounded-lg mb-2 active:bg-gray-100"
             onPress={() => {
-              if (item.screen === "Main") {
-                navigation.navigate("Main");
+              if (item.screen === "Tabs") {
+                navigation.navigate("Tabs");
               } else {
                 // For now, just show an alert for unimplemented screens
                 alert(`${item.title} screen coming soon!`);
@@ -94,7 +94,7 @@ function DrawerNavigator() {
         },
       }}
     >
-      <Drawer.Screen name="Main" component={TabNavigator} />
+      <Drawer.Screen name="Tabs" component={TabNavigator} />
     </Drawer.Navigator>
   );
 }

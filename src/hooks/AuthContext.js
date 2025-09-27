@@ -8,19 +8,11 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Load user from storage on app start
-  useEffect(() => {
-    const loadUser = async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (token) {
-        setUser({ token });
-      }
-    };
-    loadUser();
-  }, []);
+  // Load user & token from storage on app start
 
   // Login function
   const login = async (email, password) => {
@@ -32,12 +24,14 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
-      const { token, user: userData } = response.data;
-
+      const { token, user } = response.data;
+      console.log("User Info from login:", user);
       await AsyncStorage.setItem("token", token);
-      setUser({ ...userData, token });
+      await AsyncStorage.setItem("user", JSON.stringify(user));
+
+      setUser(user);
     } catch (err) {
-      console.error(err.response?.data || err.message);
+      console.error("Login error:", err.response?.data || err.message);
       setError(err.response?.data?.detail || "Login failed");
     } finally {
       setLoading(false);
@@ -47,11 +41,35 @@ export const AuthProvider = ({ children }) => {
   // Logout function
   const logout = async () => {
     await AsyncStorage.removeItem("token");
+    await AsyncStorage.removeItem("user");
+    setToken(null);
     setUser(null);
   };
 
+  useEffect(() => {
+    const loadAuth = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem("token");
+        const storedUser = await AsyncStorage.getItem("user");
+
+        if (storedToken && storedUser) {
+          setToken(storedToken);
+          setUser(JSON.parse(storedUser));
+        }
+
+        console.log("User Info from storage:", user);
+      } catch (err) {
+        console.error("Failed to load auth:", err);
+      }
+    };
+    loadAuth();
+  }, []);
+
+  console.log("User Info from context:", user);
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, loading, error, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
