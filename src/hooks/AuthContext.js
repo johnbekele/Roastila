@@ -13,39 +13,6 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   // Load user & token from storage on app start
-
-  // Login function
-  const login = async (email, password) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
-        email,
-        password,
-      });
-
-      const { token, user } = response.data;
-      console.log("User Info from login:", user);
-      await AsyncStorage.setItem("token", token);
-      await AsyncStorage.setItem("user", JSON.stringify(user));
-
-      setUser(user);
-    } catch (err) {
-      console.error("Login error:", err.response?.data || err.message);
-      setError(err.response?.data?.detail || "Login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Logout function
-  const logout = async () => {
-    await AsyncStorage.removeItem("token");
-    await AsyncStorage.removeItem("user");
-    setToken(null);
-    setUser(null);
-  };
-
   useEffect(() => {
     const loadAuth = async () => {
       try {
@@ -65,10 +32,89 @@ export const AuthProvider = ({ children }) => {
     loadAuth();
   }, []);
 
+  // Regular login function
+  const login = async (email, password, googleUserData = null) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      let response;
+
+      if (googleUserData) {
+        // Google Sign-In flow
+        console.log("🔐 [AUTH] Processing Google Sign-In");
+        response = await axios.post(`${API_URL}/auth/google-login`, {
+          id_token: googleUserData.id_token,
+          access_token: googleUserData.access_token,
+          email: googleUserData.email,
+          name: googleUserData.name,
+          given_name: googleUserData.given_name,
+          family_name: googleUserData.family_name,
+          photo: googleUserData.photo,
+        });
+      } else {
+        // Regular email/password login
+        console.log("🔐 [AUTH] Processing regular login");
+        response = await axios.post(`${API_URL}/auth/login`, {
+          email,
+          password,
+        });
+      }
+
+      const { token: authToken, user: userData } = response.data;
+      console.log("✅ [AUTH] Login successful, user data:", userData);
+
+      // Store authentication data
+      await AsyncStorage.setItem("token", authToken);
+      await AsyncStorage.setItem("user", JSON.stringify(userData));
+
+      setToken(authToken);
+      setUser(userData);
+
+      return { success: true, user: userData };
+    } catch (err) {
+      console.error(
+        "❌ [AUTH] Login error:",
+        err.response?.data || err.message
+      );
+      const errorMessage =
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        "Login failed";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Google Sign-In specific function
+  const googleLogin = async (googleUserData) => {
+    return await login(null, null, googleUserData);
+  };
+
+  // Logout function
+  const logout = async () => {
+    console.log("🚪 [AUTH] Logging out user");
+    await AsyncStorage.removeItem("token");
+    await AsyncStorage.removeItem("user");
+    setToken(null);
+    setUser(null);
+    console.log("✅ [AUTH] User logged out successfully");
+  };
+
   console.log("User Info from context:", user);
   return (
     <AuthContext.Provider
-      value={{ user, token, loading, error, login, logout }}
+      value={{
+        user,
+        token,
+        loading,
+        error,
+        login,
+        googleLogin,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
