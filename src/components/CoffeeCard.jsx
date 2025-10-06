@@ -1,5 +1,8 @@
 import React from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
+import { useTheme } from "../context/ThemeContext";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 const CoffeeCard = ({
   coffee,
@@ -16,6 +19,7 @@ const CoffeeCard = ({
   availability = "In Stock",
   ...props
 }) => {
+  const { theme } = useTheme();
   const coffeeData = coffee || {
     image,
     name,
@@ -32,78 +36,157 @@ const CoffeeCard = ({
   return (
     <TouchableOpacity
       onPress={() => onPress?.(coffeeData)}
-      className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden active:bg-gray-50"
+      style={{
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.borderRadius.lg,
+        marginBottom: theme.spacing.sm,
+        shadowColor: theme.colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+      }}
       {...props}
     >
-      {/* Coffee Image */}
-      <View className="relative">
-        <Image
-          source={{ uri: coffeeData.image }}
-          className="w-full h-48"
-          resizeMode="cover"
-        />
-        <View className="absolute top-3 right-3 bg-white/90 px-2 py-1 rounded-full">
-          <Text className="text-xs font-semibold text-green-600">
-            {coffeeData.availability}
-          </Text>
-        </View>
-      </View>
-
-      {/* Coffee Details */}
-      <View className="p-4">
-        {/* Name and Rating */}
-        <View className="flex-row justify-between items-start mb-2">
-          <Text className="text-lg font-bold text-gray-800 flex-1 mr-2">
-            {coffeeData.name}
-          </Text>
-          <View className="flex-row items-center">
-            <Text className="text-amber-500 text-sm">⭐</Text>
-            <Text className="text-sm font-semibold text-gray-700 ml-1">
-              {coffeeData.rating}
-            </Text>
-            <Text className="text-xs text-gray-500 ml-1">
-              ({coffeeData.reviews})
+      <View className="flex-row">
+        {/* Coffee Image */}
+        <View
+          className="relative"
+          style={{
+            width: screenWidth < 400 ? 100 : screenWidth < 500 ? 120 : 140,
+            height: screenWidth < 400 ? 100 : screenWidth < 500 ? 120 : 140,
+          }}
+        >
+          <Image
+            source={{ uri: coffeeData.image }}
+            className="w-full h-full"
+            resizeMode="cover"
+          />
+          <View className="absolute top-2 right-2 bg-white/90 px-1.5 py-0.5 rounded-full">
+            <Text className="text-xs font-medium text-green-600">
+              {coffeeData.availability}
             </Text>
           </View>
         </View>
 
-        {/* Origin */}
-        <Text className="text-sm text-gray-600 mb-2">
-          🌍 {coffeeData.origin}
-        </Text>
-
-        {/* Processing and Altitude */}
-        <View className="flex-row justify-between mb-3">
-          <Text className="text-xs text-gray-500">
-            Processing: {coffeeData.processing}
-          </Text>
-          <Text className="text-xs text-gray-500">
-            Altitude: {coffeeData.altitude}
-          </Text>
-        </View>
-
-        {/* Flavor Notes */}
-        <View className="flex-row flex-wrap mb-3">
-          {coffeeData.flavorNotes.map((note, index) => (
-            <View
-              key={index}
-              className="bg-amber-100 px-2 py-1 rounded-full mr-2 mb-1"
+        {/* Coffee Details */}
+        <View className="flex-1 p-3">
+          {/* Name and Rating */}
+          <View className="flex-row justify-between items-start mb-2">
+            <Text
+              style={{
+                fontSize:
+                  screenWidth < 400
+                    ? theme.typography.fontSize.sm
+                    : theme.typography.fontSize.base,
+                fontWeight: theme.typography.fontWeight.bold,
+                color: theme.colors.text,
+                flex: 1,
+                marginRight: theme.spacing.sm,
+              }}
+              numberOfLines={2}
             >
-              <Text className="text-xs text-amber-700 font-medium">{note}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Price and Action */}
-        <View className="flex-row justify-between items-center">
-          <Text className="text-xl font-bold text-amber-600">
-            {coffeeData.price}
-          </Text>
-          <TouchableOpacity className="bg-amber-500 px-4 py-2 rounded-lg active:bg-amber-600">
-            <Text className="text-white font-semibold text-sm">
-              View Details
+              {coffeeData.name}
             </Text>
-          </TouchableOpacity>
+            <View className="flex-row items-center">
+              <Text className="text-amber-500 text-sm">⭐</Text>
+              <Text
+                style={{
+                  fontSize: theme.typography.fontSize.sm,
+                  fontWeight: theme.typography.fontWeight.semibold,
+                  color: theme.colors.textSecondary,
+                  marginLeft: theme.spacing.xs,
+                }}
+              >
+                {coffeeData.rating}
+              </Text>
+            </View>
+          </View>
+
+          {/* Origin and Producer */}
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.sm,
+              color: theme.colors.textSecondary,
+              marginBottom: theme.spacing.xs,
+            }}
+            numberOfLines={1}
+          >
+            🌍 {coffeeData.origin}
+          </Text>
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.sm,
+              color: theme.colors.textSecondary,
+              marginBottom: theme.spacing.xs,
+            }}
+            numberOfLines={1}
+          >
+            Producer: {coffeeData.producer || "Ethiopian Co-op"}
+          </Text>
+
+          {/* Processing and Certification */}
+          <View className="flex-row justify-between items-center mb-2">
+            <Text className="text-sm text-gray-500">
+              {coffeeData.processing} • {coffeeData.altitude}
+            </Text>
+            <Text className="text-sm text-green-600 font-medium">
+              {coffeeData.certification || "Organic"}
+            </Text>
+          </View>
+
+          {/* Flavor Notes */}
+          <View className="flex-row flex-wrap mb-3">
+            {coffeeData.flavorNotes.slice(0, 4).map((note, index) => (
+              <View
+                key={index}
+                className="bg-amber-100 px-2 py-1 rounded-full mr-1 mb-1"
+              >
+                <Text className="text-xs text-amber-700 font-medium">
+                  {note}
+                </Text>
+              </View>
+            ))}
+            {coffeeData.flavorNotes.length > 4 && (
+              <View className="bg-gray-100 px-2 py-1 rounded-full">
+                <Text className="text-xs text-gray-600 font-medium">
+                  +{coffeeData.flavorNotes.length - 4}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Price and Actions */}
+          <View className="flex-row justify-between items-center">
+            <View>
+              <Text className="text-xl font-bold text-amber-600">
+                {coffeeData.price}
+              </Text>
+              <Text className="text-xs text-gray-500">
+                Min Qty: 50kg • {coffeeData.quantity}kg available
+              </Text>
+            </View>
+            <View className="flex-row">
+              <TouchableOpacity
+                className={`bg-green-600 ${screenWidth < 400 ? "px-2 py-1.5" : "px-4 py-2"} rounded-lg mr-2 shadow-sm`}
+              >
+                <Text
+                  className={`text-white font-semibold ${screenWidth < 400 ? "text-xs" : "text-sm"}`}
+                >
+                  Quote
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`bg-blue-600 ${screenWidth < 400 ? "px-2 py-1.5" : "px-4 py-2"} rounded-lg shadow-sm`}
+              >
+                <Text
+                  className={`text-white font-semibold ${screenWidth < 400 ? "text-xs" : "text-sm"}`}
+                >
+                  Contact
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </View>
     </TouchableOpacity>

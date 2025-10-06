@@ -2,8 +2,10 @@ import { createStackNavigator } from "@react-navigation/stack";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "../context/ThemeContext";
 
 // Import tabs
+import ProducerDetailScreen from "../screens/ProducerDetailScreen";
 import BrowseCoffeTab from "../tabs/BrowseCoffeTab";
 import FindProducersTab from "../tabs/FindProducersTab";
 
@@ -11,27 +13,80 @@ const Stack = createStackNavigator();
 
 // Custom Header for Side Navigation
 function SideHeader({ navigation, title, subtitle }) {
+  const { theme } = useTheme();
+
   return (
-    <SafeAreaView edges={["top"]} className="bg-white">
-      <View className="border-b border-gray-200 px-4 py-3 flex-row items-center justify-between">
+    <SafeAreaView
+      edges={["top"]}
+      style={{ backgroundColor: theme.colors.surface }}
+    >
+      <View
+        style={{
+          borderBottomWidth: 1,
+          borderBottomColor: theme.colors.border,
+          paddingHorizontal: theme.spacing.md,
+          paddingVertical: theme.spacing.sm,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          className="flex-row items-center"
+          style={{ flexDirection: "row", alignItems: "center" }}
         >
-          <Text className="text-2xl mr-2">←</Text>
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.xl,
+              marginRight: theme.spacing.sm,
+              color: theme.colors.text,
+            }}
+          >
+            ←
+          </Text>
           <View>
-            <Text className="text-xl font-bold text-gray-800">{title}</Text>
+            <Text
+              style={{
+                fontSize: theme.typography.fontSize.xl,
+                fontWeight: theme.typography.fontWeight.bold,
+                color: theme.colors.text,
+              }}
+            >
+              {title}
+            </Text>
             {subtitle && (
-              <Text className="text-sm text-gray-600">{subtitle}</Text>
+              <Text
+                style={{
+                  fontSize: theme.typography.fontSize.sm,
+                  color: theme.colors.textSecondary,
+                }}
+              >
+                {subtitle}
+              </Text>
             )}
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => navigation.openDrawer()}
-          className="w-10 h-10 bg-blue-500 rounded-full items-center justify-center"
+          style={{
+            width: 40,
+            height: 40,
+            backgroundColor: theme.colors.primary,
+            borderRadius: theme.borderRadius.full,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
-          <Text className="text-white text-lg font-bold">☕</Text>
+          <Text
+            style={{
+              color: theme.colors.textInverse,
+              fontSize: theme.typography.fontSize.lg,
+              fontWeight: theme.typography.fontWeight.bold,
+            }}
+          >
+            ☕
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -39,8 +94,11 @@ function SideHeader({ navigation, title, subtitle }) {
 }
 
 function SideNavigator() {
+  const { themeMode } = useTheme();
+
   return (
     <Stack.Navigator
+      key={themeMode}
       screenOptions={{
         headerShown: true,
         header: ({ navigation, route }) => {
@@ -77,6 +135,13 @@ function SideNavigator() {
         component={FindProducersTab}
         options={{
           headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="ProducerDetail"
+        component={ProducerDetailScreen}
+        options={{
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

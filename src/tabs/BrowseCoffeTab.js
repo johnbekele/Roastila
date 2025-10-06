@@ -4,11 +4,13 @@ import {
   RefreshControl,
   ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import CoffeeCard from "../components/CoffeeCard";
-import SearchBar from "../components/SearchBar";
+import FilterBottomSheet from "../components/FilterBottomSheet";
+import { useTheme } from "../context/ThemeContext";
 import {
   useCoffeeFilterOptions,
   useCoffeeSearch,
@@ -17,6 +19,10 @@ import {
 const BrowseCoffeTab = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedCoffees, setSelectedCoffees] = useState(new Set());
+  const [bulkMode, setBulkMode] = useState(false);
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 100 });
+  const { theme } = useTheme();
 
   const {
     coffees,
@@ -40,14 +46,7 @@ const BrowseCoffeTab = () => {
     isEmpty,
   } = useCoffeeSearch();
 
-  const {
-    regions,
-    processingMethods,
-    certifications,
-    availabilityOptions,
-    priceRange,
-    ratingRange,
-  } = useCoffeeFilterOptions();
+  const { regions, processingMethods } = useCoffeeFilterOptions();
 
   const handleSearch = (query) => {
     search(query);
@@ -55,6 +54,10 @@ const BrowseCoffeTab = () => {
 
   const handleFilterPress = () => {
     setShowFilters(!showFilters);
+  };
+
+  const handlePriceRangeChange = (min, max) => {
+    setPriceRange({ min, max });
   };
 
   const handleCoffeePress = (coffee) => {
@@ -82,18 +85,76 @@ const BrowseCoffeTab = () => {
   };
 
   const handleSort = (sortOption) => {
-    sort(sortOption);
-    setShowFilters(false);
+    // Toggle sort: if the same sort is already selected, remove it
+    if (sortBy === sortOption) {
+      sort("");
+    } else {
+      sort(sortOption);
+    }
   };
 
   const handleFilter = (filterType, value) => {
-    applyFilters({ [filterType]: value });
+    // Toggle filter: if the same value is already selected, remove it
+    if (filters[filterType] === value) {
+      applyFilters({ [filterType]: null });
+    } else {
+      applyFilters({ [filterType]: value });
+    }
   };
 
   const clearAllFilters = () => {
     clearFilters();
     clearSearch();
     setShowFilters(false);
+  };
+
+  const toggleBulkMode = () => {
+    setBulkMode(!bulkMode);
+    if (!bulkMode) {
+      setSelectedCoffees(new Set());
+    }
+  };
+
+  const toggleCoffeeSelection = (coffeeId) => {
+    const newSelected = new Set(selectedCoffees);
+    if (newSelected.has(coffeeId)) {
+      newSelected.delete(coffeeId);
+    } else {
+      newSelected.add(coffeeId);
+    }
+    setSelectedCoffees(newSelected);
+  };
+
+  const selectAllCoffees = () => {
+    const allIds = new Set(coffees.map((coffee) => coffee.id));
+    setSelectedCoffees(allIds);
+  };
+
+  const clearSelection = () => {
+    setSelectedCoffees(new Set());
+  };
+
+  const handleBulkAction = (action) => {
+    const selectedCount = selectedCoffees.size;
+    Alert.alert(
+      `${action} Selected Coffees`,
+      `This will ${action.toLowerCase()} ${selectedCount} coffee${selectedCount > 1 ? "s" : ""}. Continue?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Confirm",
+          onPress: () => {
+            console.log(
+              `${action} ${selectedCount} coffees:`,
+              Array.from(selectedCoffees)
+            );
+            // Here you would implement the actual bulk action
+            setSelectedCoffees(new Set());
+            setBulkMode(false);
+          },
+        },
+      ]
+    );
   };
 
   if (isError) {
@@ -116,225 +177,552 @@ const BrowseCoffeTab = () => {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="bg-white px-6 py-4 shadow-sm">
-        <Text className="text-2xl font-bold text-gray-800 mb-1">
-          Browse Coffees
-        </Text>
-        <Text className="text-gray-600">
-          {total} premium Ethiopian coffees available
-        </Text>
-      </View>
-
-      {/* Search Bar */}
-      <View className="px-4 pt-4">
-        <SearchBar
-          onSearch={handleSearch}
-          onFilterPress={handleFilterPress}
-          placeholder="Search by name, origin, flavor, or producer..."
-        />
-      </View>
-
-      {/* Active Filters & Sort */}
-      {(hasActiveFilters || hasSearchQuery) && (
-        <View className="px-4 mb-4">
-          <View className="bg-white rounded-lg p-3 shadow-sm">
-            <View className="flex-row justify-between items-center mb-2">
-              <Text className="text-sm font-semibold text-gray-700">
-                Active Filters
+    <View
+      style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}
+    >
+      {/* Top Search Section */}
+      <View
+        style={{
+          backgroundColor: theme.colors.surface,
+          paddingHorizontal: theme.spacing.md,
+          paddingVertical: theme.spacing.sm,
+          shadowColor: theme.colors.shadow,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: theme.spacing.sm,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.xl,
+              fontWeight: theme.typography.fontWeight.bold,
+              color: theme.colors.text,
+            }}
+          >
+            Browse Coffees
+          </Text>
+          <View style={{ flexDirection: "row" }}>
+            <TouchableOpacity
+              onPress={toggleBulkMode}
+              style={{
+                paddingHorizontal: theme.spacing.sm,
+                paddingVertical: theme.spacing.xs,
+                borderRadius: theme.borderRadius.full,
+                marginRight: theme.spacing.sm,
+                backgroundColor: bulkMode
+                  ? theme.colors.primary
+                  : theme.colors.backgroundSecondary,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: theme.typography.fontSize.xs,
+                  fontWeight: theme.typography.fontWeight.medium,
+                  color: bulkMode
+                    ? theme.colors.textInverse
+                    : theme.colors.text,
+                }}
+              >
+                {bulkMode ? "Exit Bulk" : "Bulk"}
               </Text>
-              <TouchableOpacity onPress={clearAllFilters}>
-                <Text className="text-amber-600 text-sm font-medium">
-                  Clear All
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleFilterPress}
+              style={{
+                backgroundColor: theme.colors.secondary,
+                paddingHorizontal: theme.spacing.sm,
+                paddingVertical: theme.spacing.xs,
+                borderRadius: theme.borderRadius.full,
+              }}
+            >
+              <Text
+                style={{
+                  color: theme.colors.textInverse,
+                  fontSize: theme.typography.fontSize.xs,
+                  fontWeight: theme.typography.fontWeight.medium,
+                }}
+              >
+                Filters
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Search Input */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: theme.colors.backgroundSecondary,
+            borderRadius: theme.borderRadius.lg,
+            paddingHorizontal: theme.spacing.sm,
+            paddingVertical: theme.spacing.sm,
+          }}
+        >
+          <Text
+            style={{
+              color: theme.colors.textTertiary,
+              fontSize: theme.typography.fontSize.base,
+              marginRight: theme.spacing.sm,
+            }}
+          >
+            🔍
+          </Text>
+          <TextInput
+            style={{
+              flex: 1,
+              color: theme.colors.text,
+              fontSize: theme.typography.fontSize.sm,
+            }}
+            placeholder="Search coffees..."
+            placeholderTextColor={theme.colors.textTertiary}
+            value={searchQuery}
+            onChangeText={handleSearch}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          {searchQuery && (
+            <TouchableOpacity
+              onPress={() => handleSearch("")}
+              style={{
+                marginLeft: theme.spacing.sm,
+                padding: theme.spacing.xs,
+              }}
+            >
+              <Text
+                style={{
+                  color: theme.colors.textTertiary,
+                  fontSize: theme.typography.fontSize.sm,
+                }}
+              >
+                ✕
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Stats Row */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginTop: theme.spacing.sm,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.sm,
+              color: theme.colors.textSecondary,
+            }}
+          >
+            {total} coffees available
+            {bulkMode &&
+              selectedCoffees.size > 0 &&
+              ` • ${selectedCoffees.size} selected`}
+          </Text>
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.xs,
+              color: theme.colors.textTertiary,
+            }}
+          >
+            €35-65 price range
+          </Text>
+        </View>
+      </View>
+
+      {/* Bulk Mode Controls */}
+      {bulkMode && (
+        <View
+          style={{
+            paddingHorizontal: theme.spacing.md,
+            paddingVertical: theme.spacing.sm,
+            backgroundColor: theme.colors.infoLight,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: theme.spacing.sm,
+            }}
+          >
+            <View style={{ flexDirection: "row" }}>
+              <TouchableOpacity
+                onPress={selectAllCoffees}
+                style={{
+                  backgroundColor: theme.colors.primary,
+                  paddingHorizontal: theme.spacing.sm,
+                  paddingVertical: theme.spacing.xs,
+                  borderRadius: theme.borderRadius.md,
+                  marginRight: theme.spacing.sm,
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.colors.textInverse,
+                    fontSize: theme.typography.fontSize.xs,
+                    fontWeight: theme.typography.fontWeight.medium,
+                  }}
+                >
+                  Select All
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={clearSelection}
+                style={{
+                  backgroundColor: theme.colors.textSecondary,
+                  paddingHorizontal: theme.spacing.sm,
+                  paddingVertical: theme.spacing.xs,
+                  borderRadius: theme.borderRadius.md,
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.colors.textInverse,
+                    fontSize: theme.typography.fontSize.xs,
+                    fontWeight: theme.typography.fontWeight.medium,
+                  }}
+                >
+                  Clear
                 </Text>
               </TouchableOpacity>
             </View>
-
-            {hasSearchQuery && (
-              <View className="flex-row items-center mb-2">
-                <Text className="text-xs text-gray-600 mr-2">Search:</Text>
-                <View className="bg-amber-100 px-2 py-1 rounded-full flex-row items-center">
-                  <Text className="text-xs text-amber-700 mr-1">
-                    "{searchQuery}"
-                  </Text>
-                  <TouchableOpacity onPress={clearSearch}>
-                    <Text className="text-amber-600 text-xs">✕</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-
-            {sortBy && (
-              <View className="flex-row items-center">
-                <Text className="text-xs text-gray-600 mr-2">Sort:</Text>
-                <View className="bg-blue-100 px-2 py-1 rounded-full">
-                  <Text className="text-xs text-blue-700">
-                    {sortBy.replace("-", " ").toUpperCase()}
-                  </Text>
-                </View>
-              </View>
-            )}
+            <Text
+              style={{
+                color: theme.colors.info,
+                fontSize: theme.typography.fontSize.xs,
+                fontWeight: theme.typography.fontWeight.medium,
+              }}
+            >
+              {selectedCoffees.size} selected
+            </Text>
           </View>
+
+          {selectedCoffees.size > 0 && (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => handleBulkAction("Request Quote")}
+                style={{
+                  backgroundColor: theme.colors.success,
+                  paddingHorizontal: theme.spacing.sm,
+                  paddingVertical: theme.spacing.xs,
+                  borderRadius: theme.borderRadius.md,
+                  flex: 1,
+                  marginRight: theme.spacing.xs,
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.colors.textInverse,
+                    fontSize: theme.typography.fontSize.xs,
+                    fontWeight: theme.typography.fontWeight.medium,
+                    textAlign: "center",
+                  }}
+                >
+                  Request Quote
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleBulkAction("Add to Inquiry")}
+                style={{
+                  backgroundColor: theme.colors.secondary,
+                  paddingHorizontal: theme.spacing.sm,
+                  paddingVertical: theme.spacing.xs,
+                  borderRadius: theme.borderRadius.md,
+                  flex: 1,
+                  marginHorizontal: theme.spacing.xs,
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.colors.textInverse,
+                    fontSize: theme.typography.fontSize.xs,
+                    fontWeight: theme.typography.fontWeight.medium,
+                    textAlign: "center",
+                  }}
+                >
+                  Add to Inquiry
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleBulkAction("Save")}
+                style={{
+                  backgroundColor: theme.colors.textSecondary,
+                  paddingHorizontal: theme.spacing.sm,
+                  paddingVertical: theme.spacing.xs,
+                  borderRadius: theme.borderRadius.md,
+                  flex: 1,
+                  marginLeft: theme.spacing.xs,
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.colors.textInverse,
+                    fontSize: theme.typography.fontSize.xs,
+                    fontWeight: theme.typography.fontWeight.medium,
+                    textAlign: "center",
+                  }}
+                >
+                  Save
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
 
-      {/* Filter Panel */}
-      {showFilters && (
-        <View className="px-4 mb-4">
-          <View className="bg-white rounded-lg p-4 shadow-sm">
-            <Text className="text-lg font-semibold text-gray-800 mb-4">
-              Filters & Sort
-            </Text>
-
-            {/* Sort Options */}
-            <View className="mb-4">
-              <Text className="text-sm font-medium text-gray-700 mb-2">
-                Sort By
-              </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {[
-                  { key: "", label: "Default" },
-                  { key: "name", label: "Name A-Z" },
-                  { key: "price-low", label: "Price Low" },
-                  { key: "price-high", label: "Price High" },
-                  { key: "rating", label: "Rating" },
-                  { key: "newest", label: "Newest" },
-                ].map((option) => (
-                  <TouchableOpacity
-                    key={option.key}
-                    onPress={() => handleSort(option.key)}
-                    className={`px-3 py-2 rounded-full mr-2 ${
-                      sortBy === option.key ? "bg-amber-500" : "bg-gray-100"
-                    }`}
+      {/* Active Filters */}
+      {(hasActiveFilters || hasSearchQuery) && (
+        <View
+          style={{
+            paddingHorizontal: theme.spacing.md,
+            paddingVertical: theme.spacing.sm,
+            backgroundColor: theme.colors.warningLight,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                flex: 1,
+              }}
+            >
+              {hasSearchQuery && (
+                <View
+                  style={{
+                    backgroundColor: theme.colors.warning,
+                    paddingHorizontal: theme.spacing.sm,
+                    paddingVertical: theme.spacing.xs,
+                    borderRadius: theme.borderRadius.full,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginRight: theme.spacing.sm,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: theme.typography.fontSize.xs,
+                      color: theme.colors.textInverse,
+                      marginRight: theme.spacing.xs,
+                    }}
                   >
+                    &ldquo;{searchQuery}&rdquo;
+                  </Text>
+                  <TouchableOpacity onPress={clearSearch}>
                     <Text
-                      className={`text-xs font-medium ${
-                        sortBy === option.key ? "text-white" : "text-gray-700"
-                      }`}
+                      style={{
+                        color: theme.colors.textInverse,
+                        fontSize: theme.typography.fontSize.xs,
+                      }}
                     >
-                      {option.label}
+                      ✕
                     </Text>
                   </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-
-            {/* Region Filter */}
-            <View className="mb-4">
-              <Text className="text-sm font-medium text-gray-700 mb-2">
-                Region
-              </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {regions.map((region) => (
-                  <TouchableOpacity
-                    key={region}
-                    onPress={() => handleFilter("region", region)}
-                    className={`px-3 py-2 rounded-full mr-2 ${
-                      filters.region === region ? "bg-amber-500" : "bg-gray-100"
-                    }`}
+                </View>
+              )}
+              {sortBy && (
+                <View
+                  style={{
+                    backgroundColor: theme.colors.info,
+                    paddingHorizontal: theme.spacing.sm,
+                    paddingVertical: theme.spacing.xs,
+                    borderRadius: theme.borderRadius.full,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: theme.typography.fontSize.xs,
+                      color: theme.colors.textInverse,
+                    }}
                   >
-                    <Text
-                      className={`text-xs font-medium ${
-                        filters.region === region
-                          ? "text-white"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {region}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+                    {sortBy.replace("-", " ").toUpperCase()}
+                  </Text>
+                </View>
+              )}
             </View>
-
-            {/* Processing Filter */}
-            <View className="mb-4">
-              <Text className="text-sm font-medium text-gray-700 mb-2">
-                Processing
+            <TouchableOpacity onPress={clearAllFilters}>
+              <Text
+                style={{
+                  color: theme.colors.warning,
+                  fontSize: theme.typography.fontSize.xs,
+                  fontWeight: theme.typography.fontWeight.medium,
+                }}
+              >
+                Clear All
               </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {processingMethods.map((method) => (
-                  <TouchableOpacity
-                    key={method}
-                    onPress={() => handleFilter("processing", method)}
-                    className={`px-3 py-2 rounded-full mr-2 ${
-                      filters.processing === method
-                        ? "bg-amber-500"
-                        : "bg-gray-100"
-                    }`}
-                  >
-                    <Text
-                      className={`text-xs font-medium ${
-                        filters.processing === method
-                          ? "text-white"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {method}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
       )}
 
       {/* Coffee List */}
       <ScrollView
-        className="flex-1 px-4"
+        style={{
+          flex: 1,
+          paddingHorizontal: theme.spacing.md,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={["#F59E0B"]}
-            tintColor="#F59E0B"
+            colors={[theme.colors.secondary]}
+            tintColor={theme.colors.secondary}
           />
         }
         showsVerticalScrollIndicator={false}
       >
         {isEmpty ? (
-          <View className="flex-1 justify-center items-center py-20">
-            <Text className="text-6xl mb-4">☕</Text>
-            <Text className="text-xl font-semibold text-gray-800 mb-2">
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              paddingVertical: 80,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 60,
+                marginBottom: theme.spacing.md,
+              }}
+            >
+              ☕
+            </Text>
+            <Text
+              style={{
+                fontSize: theme.typography.fontSize.xl,
+                fontWeight: theme.typography.fontWeight.semibold,
+                color: theme.colors.text,
+                marginBottom: theme.spacing.sm,
+              }}
+            >
               No coffees found
             </Text>
-            <Text className="text-gray-600 text-center mb-6">
+            <Text
+              style={{
+                color: theme.colors.textSecondary,
+                textAlign: "center",
+                marginBottom: theme.spacing.md,
+              }}
+            >
               Try adjusting your search or filters
             </Text>
             <TouchableOpacity
               onPress={reset}
-              className="bg-amber-500 px-6 py-3 rounded-lg"
+              style={{
+                backgroundColor: theme.colors.secondary,
+                paddingHorizontal: theme.spacing.md,
+                paddingVertical: theme.spacing.sm,
+                borderRadius: theme.borderRadius.lg,
+              }}
             >
-              <Text className="text-white font-semibold">Clear All</Text>
+              <Text
+                style={{
+                  color: theme.colors.textInverse,
+                  fontWeight: theme.typography.fontWeight.semibold,
+                }}
+              >
+                Clear All
+              </Text>
             </TouchableOpacity>
           </View>
         ) : (
           <>
-            {/* Results Header */}
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-sm text-gray-600">
+            {/* Compact Results Header */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: theme.spacing.sm,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: theme.typography.fontSize.xs,
+                  color: theme.colors.textSecondary,
+                }}
+              >
                 {isFetching ? "Searching..." : `${total} coffees found`}
               </Text>
               {isLoading && (
-                <View className="flex-row items-center">
-                  <Text className="text-amber-500 text-sm mr-2">
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Text
+                    style={{
+                      color: theme.colors.secondary,
+                      fontSize: theme.typography.fontSize.xs,
+                      marginRight: theme.spacing.xs,
+                    }}
+                  >
                     Loading...
                   </Text>
-                  <Text className="text-amber-500">⏳</Text>
+                  <Text
+                    style={{
+                      color: theme.colors.secondary,
+                      fontSize: theme.typography.fontSize.xs,
+                    }}
+                  >
+                    ⏳
+                  </Text>
                 </View>
               )}
             </View>
 
-            {/* Coffee Cards */}
-            {coffees.map((coffee) => (
-              <CoffeeCard
-                key={coffee.id}
-                coffee={coffee}
-                onPress={handleCoffeePress}
-              />
-            ))}
+            {/* Coffee Cards List */}
+            <View>
+              {coffees
+                .filter(
+                  (coffee, index, self) =>
+                    index === self.findIndex((c) => c.id === coffee.id)
+                )
+                .map((coffee, index) => (
+                  <View key={coffee.id} className="mb-3">
+                    {bulkMode ? (
+                      <TouchableOpacity
+                        onPress={() => toggleCoffeeSelection(coffee.id)}
+                        className={`relative ${
+                          selectedCoffees.has(coffee.id) ? "opacity-75" : ""
+                        }`}
+                      >
+                        {selectedCoffees.has(coffee.id) && (
+                          <View className="absolute top-2 left-2 z-10 bg-blue-500 rounded-full w-6 h-6 items-center justify-center">
+                            <Text className="text-white text-xs font-bold">
+                              ✓
+                            </Text>
+                          </View>
+                        )}
+                        <CoffeeCard coffee={coffee} onPress={() => {}} />
+                      </TouchableOpacity>
+                    ) : (
+                      <CoffeeCard coffee={coffee} onPress={handleCoffeePress} />
+                    )}
+                  </View>
+                ))}
+            </View>
 
             {/* Load More Button (for future pagination) */}
             {coffees.length > 0 && (
@@ -352,6 +740,44 @@ const BrowseCoffeTab = () => {
           </>
         )}
       </ScrollView>
+
+      {/* Filter Bottom Sheet */}
+      <FilterBottomSheet
+        visible={showFilters}
+        onClose={() => setShowFilters(false)}
+        title="Coffee Filters & Sort"
+        priceRange={{
+          minPrice: 0,
+          maxPrice: 100,
+          currentMin: priceRange.min,
+          currentMax: priceRange.max,
+          currency: "€",
+        }}
+        onPriceRangeChange={handlePriceRangeChange}
+        sortOptions={[
+          { key: "", label: "Default" },
+          { key: "name", label: "Name A-Z" },
+          { key: "price-low", label: "Price Low" },
+          { key: "price-high", label: "Price High" },
+          { key: "rating", label: "Rating" },
+          { key: "newest", label: "Newest" },
+        ]}
+        sortBy={sortBy}
+        onSortChange={handleSort}
+        filterCategories={{
+          Region: regions,
+          Processing: processingMethods,
+        }}
+        onCategoryFilter={(category, option) => {
+          const filterKey = category.toLowerCase();
+          handleFilter(filterKey, option);
+        }}
+        onClearAll={() => {
+          clearFilters();
+          clearSearch();
+          setPriceRange({ min: 0, max: 100 });
+        }}
+      />
     </View>
   );
 };

@@ -22,14 +22,14 @@ const SearchBar = ({
 
   return (
     <View
-      className={`bg-white rounded-xl shadow-sm p-4 mb-4 ${className}`}
+      className={`bg-white rounded-lg shadow-sm p-3 ${className}`}
       {...props}
     >
-      {/* Search Input */}
-      <View className="flex-row items-center bg-gray-50 rounded-lg px-4 py-3 mb-3">
-        <Text className="text-gray-400 text-lg mr-3">🔍</Text>
+      {/* Compact Search Input */}
+      <View className="flex-row items-center bg-gray-50 rounded-lg px-3 py-2">
+        <Text className="text-gray-400 text-base mr-2">🔍</Text>
         <TextInput
-          className="flex-1 text-gray-800 text-base"
+          className="flex-1 text-gray-800 text-sm"
           placeholder={placeholder}
           placeholderTextColor="#9CA3AF"
           value={searchQuery}
@@ -41,33 +41,19 @@ const SearchBar = ({
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={handleClear} className="ml-2 p-1">
-            <Text className="text-gray-400 text-lg">✕</Text>
+            <Text className="text-gray-400 text-sm">✕</Text>
           </TouchableOpacity>
         )}
-      </View>
-
-      {/* Action Buttons */}
-      <View className="flex-row justify-between">
         <TouchableOpacity
           onPress={handleSearch}
-          className="bg-amber-500 px-6 py-3 rounded-lg flex-1 mr-2 active:bg-amber-600"
+          className="bg-amber-500 px-3 py-2 rounded-lg ml-2"
         >
-          <Text className="text-white font-semibold text-center">Search</Text>
+          <Text className="text-white font-medium text-sm">Search</Text>
         </TouchableOpacity>
-
-        {showFilter && (
-          <TouchableOpacity
-            onPress={onFilterPress}
-            className="bg-gray-100 px-4 py-3 rounded-lg active:bg-gray-200"
-          >
-            <Text className="text-gray-700 font-medium">Filter</Text>
-          </TouchableOpacity>
-        )}
       </View>
 
       {/* Quick Search Tags */}
-      <View className="mt-3">
-        <Text className="text-sm text-gray-500 mb-2">Quick search:</Text>
+      <View className="mt-2">
         <View className="flex-row flex-wrap">
           {[
             "Yirgacheffe",
@@ -83,7 +69,7 @@ const SearchBar = ({
                 setSearchQuery(tag);
                 onSearch?.(tag);
               }}
-              className="bg-gray-100 px-3 py-1 rounded-full mr-2 mb-1 active:bg-amber-100"
+              className="bg-gray-100 px-2 py-1 rounded-full mr-1 mb-1"
             >
               <Text className="text-xs text-gray-600 font-medium">{tag}</Text>
             </TouchableOpacity>

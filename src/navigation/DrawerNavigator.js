@@ -1,10 +1,13 @@
 // src/navigation/DrawerNavigator.js
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../hooks/useAuth";
 
 // Navigators
+import AboutScreen from "../screens/AboutScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import SettingsScreen from "../screens/SettingsScreen";
 import BottomNavigator from "./BottomNavigator";
 import SideNavigator from "./SideNavigator";
 import TabNavigator from "./TabNavigator";
@@ -14,6 +17,7 @@ const Drawer = createDrawerNavigator();
 // Custom Drawer Content
 function CustomDrawerContent({ navigation }) {
   const { logout, user } = useAuth();
+  const { theme } = useTheme();
 
   const menuItems = [
     { id: 1, title: "Home", icon: "🏠", screen: "Tabs" },
@@ -30,18 +34,62 @@ function CustomDrawerContent({ navigation }) {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: theme.colors.background,
+      }}
+    >
       {/* Header */}
-      <View className="bg-blue-500 p-6 pt-12">
-        <View className="flex-row items-center">
-          <View className="w-12 h-12 bg-white rounded-full items-center justify-center mr-4">
-            <Text className="text-2xl">👤</Text>
+      <View
+        style={{
+          backgroundColor: theme.colors.primary,
+          padding: theme.spacing.md,
+          paddingTop: theme.spacing.xxl,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              width: 48,
+              height: 48,
+              backgroundColor: theme.colors.surface,
+              borderRadius: theme.borderRadius.full,
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: theme.spacing.md,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: theme.typography.fontSize["2xl"],
+              }}
+            >
+              👤
+            </Text>
           </View>
           <View>
-            <Text className="text-white text-lg font-bold">
+            <Text
+              style={{
+                color: theme.colors.textInverse,
+                fontSize: theme.typography.fontSize.lg,
+                fontWeight: theme.typography.fontWeight.bold,
+              }}
+            >
               {user?.username || "User"}
             </Text>
-            <Text className="text-blue-100 text-sm">
+            <Text
+              style={{
+                color: theme.colors.textInverse,
+                fontSize: theme.typography.fontSize.sm,
+                opacity: 0.8,
+              }}
+            >
               {user?.email || "user@example.com"}
             </Text>
           </View>
@@ -49,11 +97,24 @@ function CustomDrawerContent({ navigation }) {
       </View>
 
       {/* Menu Items */}
-      <ScrollView className="flex-1 px-4 py-4">
+      <ScrollView
+        style={{
+          flex: 1,
+          paddingHorizontal: theme.spacing.md,
+          paddingVertical: theme.spacing.md,
+        }}
+      >
         {menuItems.map((item) => (
           <TouchableOpacity
             key={item.id}
-            className="flex-row items-center py-4 px-3 rounded-lg mb-2 active:bg-gray-100"
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: theme.spacing.md,
+              paddingHorizontal: theme.spacing.sm,
+              borderRadius: theme.borderRadius.lg,
+              marginBottom: theme.spacing.sm,
+            }}
             onPress={() => {
               if (item.screen === "Tabs") {
                 navigation.navigate("Tabs");
@@ -63,8 +124,21 @@ function CustomDrawerContent({ navigation }) {
               navigation.closeDrawer();
             }}
           >
-            <Text className="text-2xl mr-4">{item.icon}</Text>
-            <Text className="text-gray-700 text-lg font-medium">
+            <Text
+              style={{
+                fontSize: theme.typography.fontSize["2xl"],
+                marginRight: theme.spacing.md,
+              }}
+            >
+              {item.icon}
+            </Text>
+            <Text
+              style={{
+                color: theme.colors.text,
+                fontSize: theme.typography.fontSize.lg,
+                fontWeight: theme.typography.fontWeight.medium,
+              }}
+            >
               {item.title}
             </Text>
           </TouchableOpacity>
@@ -72,13 +146,41 @@ function CustomDrawerContent({ navigation }) {
       </ScrollView>
 
       {/* Footer */}
-      <View className="p-4 border-t border-gray-200">
+      <View
+        style={{
+          padding: theme.spacing.md,
+          borderTopWidth: 1,
+          borderTopColor: theme.colors.border,
+        }}
+      >
         <TouchableOpacity
-          className="flex-row items-center py-3 px-3 rounded-lg bg-red-50"
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingVertical: theme.spacing.sm,
+            paddingHorizontal: theme.spacing.sm,
+            borderRadius: theme.borderRadius.lg,
+            backgroundColor: theme.colors.errorLight,
+          }}
           onPress={handleLogout}
         >
-          <Text className="text-2xl mr-4">🚪</Text>
-          <Text className="text-red-600 text-lg font-medium">Logout</Text>
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize["2xl"],
+              marginRight: theme.spacing.md,
+            }}
+          >
+            🚪
+          </Text>
+          <Text
+            style={{
+              color: theme.colors.error,
+              fontSize: theme.typography.fontSize.lg,
+              fontWeight: theme.typography.fontWeight.medium,
+            }}
+          >
+            Logout
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -98,6 +200,8 @@ function DrawerNavigator() {
     >
       <Drawer.Screen name="Tabs" component={TabNavigator} />
       <Drawer.Screen name="Profile" component={ProfileScreen} />
+      <Drawer.Screen name="Settings" component={SettingsScreen} />
+      <Drawer.Screen name="About" component={AboutScreen} />
       <Drawer.Screen
         name="SideNavigator"
         component={SideNavigator}

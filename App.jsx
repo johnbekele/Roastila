@@ -6,6 +6,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import "./global.css";
 
+import ThemedApp from "./src/components/ThemedApp";
+import { ThemeProvider } from "./src/context/ThemeContext";
 import { AuthProvider } from "./src/hooks/AuthContext";
 import AppNavigator from "./src/navigation/AppNavigator";
 import SplashScreen from "./src/screens/SplashScreen";
@@ -30,16 +32,20 @@ export default function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
-        <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <NavigationContainer>
-              <AppNavigator />
-            </NavigationContainer>
-            {typeof document !== "undefined" && (
-              <ReactQueryDevtools initialIsOpen={false} />
-            )}
-          </QueryClientProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <ThemedApp>
+            <AuthProvider>
+              <QueryClientProvider client={queryClient}>
+                <NavigationContainer>
+                  <AppNavigator />
+                </NavigationContainer>
+                {typeof document !== "undefined" && (
+                  <ReactQueryDevtools initialIsOpen={false} />
+                )}
+              </QueryClientProvider>
+            </AuthProvider>
+          </ThemedApp>
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
@@ -48,6 +54,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1, // Fill the entire screen
-    backgroundColor: "#fff", // White background instead of black
+    // Remove hardcoded background to allow theme to work
   },
 });

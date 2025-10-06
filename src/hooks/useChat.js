@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { API_URL } from "../config/EnvConfig";
+import apiClient from "../config/axiosConfig";
 
 // Fetch chat response from backend using POST
 const fetchChat = async ({ queryKey }) => {
@@ -10,11 +9,10 @@ const fetchChat = async ({ queryKey }) => {
   if (!prompt || !username) {
     throw new Error("Missing username or prompt");
   }
-  const response = await axios.post(
-    `${API_URL}/genai/generate-response`,
-    { username: username, prompt: prompt },
-    { headers: { "Content-Type": "application/json" } }
-  );
+  const response = await apiClient.post("genai/generate-response", {
+    username: username,
+    prompt: prompt,
+  });
 
   console.log("Chat response:", response.data);
   return response.data;

@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../hooks/useAuth";
 import { useChat } from "../hooks/useChat";
 
@@ -16,6 +17,7 @@ import { useChat } from "../hooks/useChat";
 const ThinkingTile = () => {
   const [dots, setDots] = useState("");
   const fadeAnim = useRef(new Animated.Value(0.3)).current;
+  const { theme } = useTheme();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -48,30 +50,79 @@ const ThinkingTile = () => {
   }, [fadeAnim]);
 
   return (
-    <View className="mb-3 p-4 rounded-lg max-w-[80%] bg-white self-start shadow-sm">
-      <View className="flex-row items-center">
-        <View className="w-8 h-8 bg-amber-100 rounded-full items-center justify-center mr-3">
-          <Text className="text-amber-600 text-lg">🤖</Text>
+    <View
+      style={{
+        marginBottom: theme.spacing.sm,
+        padding: theme.spacing.md,
+        borderRadius: theme.borderRadius.lg,
+        maxWidth: "80%",
+        backgroundColor: theme.colors.surface,
+        alignSelf: "flex-start",
+        shadowColor: theme.colors.shadow,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View
+          style={{
+            width: 32,
+            height: 32,
+            backgroundColor: theme.colors.secondaryLight,
+            borderRadius: theme.borderRadius.full,
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: theme.spacing.sm,
+          }}
+        >
+          <Text
+            style={{
+              color: theme.colors.secondary,
+              fontSize: theme.typography.fontSize.lg,
+            }}
+          >
+            🤖
+          </Text>
         </View>
-        <View className="flex-1">
-          <Text className="text-gray-600 text-sm font-medium mb-2">
+        <View style={{ flex: 1 }}>
+          <Text
+            style={{
+              color: theme.colors.textSecondary,
+              fontSize: theme.typography.fontSize.sm,
+              fontWeight: theme.typography.fontWeight.medium,
+              marginBottom: theme.spacing.sm,
+            }}
+          >
             AI is thinking{dots}
           </Text>
-          <View className="flex-row space-x-1">
+          <View style={{ flexDirection: "row", gap: 4 }}>
             <Animated.View
-              className="w-2 h-2 bg-amber-400 rounded-full"
-              style={{ opacity: fadeAnim }}
+              style={{
+                width: 8,
+                height: 8,
+                backgroundColor: theme.colors.secondary,
+                borderRadius: theme.borderRadius.full,
+                opacity: fadeAnim,
+              }}
             />
             <Animated.View
-              className="w-2 h-2 bg-amber-400 rounded-full"
               style={{
+                width: 8,
+                height: 8,
+                backgroundColor: theme.colors.secondary,
+                borderRadius: theme.borderRadius.full,
                 opacity: fadeAnim,
                 transform: [{ translateX: 8 }],
               }}
             />
             <Animated.View
-              className="w-2 h-2 bg-amber-400 rounded-full"
               style={{
+                width: 8,
+                height: 8,
+                backgroundColor: theme.colors.secondary,
+                borderRadius: theme.borderRadius.full,
                 opacity: fadeAnim,
                 transform: [{ translateX: 16 }],
               }}
@@ -85,6 +136,7 @@ const ThinkingTile = () => {
 
 export default function ChatComponent() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState([]);
   const [currentPrompt, setCurrentPrompt] = useState("");
@@ -145,39 +197,83 @@ export default function ChatComponent() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-gray-100"
+      style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
-      <View className="flex-1 p-4">
+      <View style={{ flex: 1, padding: theme.spacing.md }}>
         <ScrollView
-          className="flex-1 mb-4"
+          style={{ flex: 1, marginBottom: theme.spacing.md }}
           contentContainerStyle={{ paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
         >
           {messages.map((msg, index) => (
             <View
               key={index}
-              className={`mb-3 p-3 rounded-lg max-w-[80%] ${
-                msg.sender === "user"
-                  ? "bg-blue-500 self-end"
-                  : "bg-white self-start"
-              }`}
+              style={{
+                marginBottom: theme.spacing.sm,
+                padding: theme.spacing.sm,
+                borderRadius: theme.borderRadius.lg,
+                maxWidth: "80%",
+                alignSelf: msg.sender === "user" ? "flex-end" : "flex-start",
+                backgroundColor:
+                  msg.sender === "user"
+                    ? theme.colors.primary
+                    : theme.colors.surface,
+                shadowColor: theme.colors.shadow,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                elevation: 2,
+              }}
             >
               {msg.sender === "ai" && (
-                <View className="flex-row items-center mb-2">
-                  <View className="w-6 h-6 bg-amber-100 rounded-full items-center justify-center mr-2">
-                    <Text className="text-amber-600 text-sm">🤖</Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: theme.spacing.sm,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 24,
+                      height: 24,
+                      backgroundColor: theme.colors.secondaryLight,
+                      borderRadius: theme.borderRadius.full,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: theme.spacing.sm,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: theme.colors.secondary,
+                        fontSize: theme.typography.fontSize.sm,
+                      }}
+                    >
+                      🤖
+                    </Text>
                   </View>
-                  <Text className="text-gray-500 text-xs font-medium">
+                  <Text
+                    style={{
+                      color: theme.colors.textSecondary,
+                      fontSize: theme.typography.fontSize.xs,
+                      fontWeight: theme.typography.fontWeight.medium,
+                    }}
+                  >
                     Roastila AI Assistant
                   </Text>
                 </View>
               )}
               <Text
-                className={`${
-                  msg.sender === "user" ? "text-white" : "text-gray-800"
-                } text-base`}
+                style={{
+                  color:
+                    msg.sender === "user"
+                      ? theme.colors.textInverse
+                      : theme.colors.text,
+                  fontSize: theme.typography.fontSize.base,
+                }}
               >
                 {(msg.text || "").split("\n").map((line, i) => (
                   <Text key={i}>
@@ -201,10 +297,20 @@ export default function ChatComponent() {
           )}
         </ScrollView>
 
-        <View className="flex-row items-center">
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <TextInput
-            className="flex-1 bg-white p-3 rounded-lg border border-gray-300"
+            style={{
+              flex: 1,
+              backgroundColor: theme.colors.surface,
+              padding: theme.spacing.sm,
+              borderRadius: theme.borderRadius.lg,
+              borderWidth: 1,
+              borderColor: theme.colors.border,
+              color: theme.colors.text,
+              fontSize: theme.typography.fontSize.sm,
+            }}
             placeholder="Ask about coffee trading, quality, or logistics..."
+            placeholderTextColor={theme.colors.textTertiary}
             value={prompt}
             onChangeText={setPrompt}
             multiline
@@ -212,13 +318,24 @@ export default function ChatComponent() {
             editable={!isLoading}
           />
           <TouchableOpacity
-            className={`ml-2 p-3 rounded-lg ${
-              isLoading ? "bg-gray-400" : "bg-blue-500"
-            }`}
+            style={{
+              marginLeft: theme.spacing.sm,
+              padding: theme.spacing.sm,
+              borderRadius: theme.borderRadius.lg,
+              backgroundColor: isLoading
+                ? theme.colors.textSecondary
+                : theme.colors.primary,
+            }}
             onPress={handleSend}
             disabled={isLoading || !prompt.trim()}
           >
-            <Text className="text-white font-bold">
+            <Text
+              style={{
+                color: theme.colors.textInverse,
+                fontSize: theme.typography.fontSize.sm,
+                fontWeight: theme.typography.fontWeight.bold,
+              }}
+            >
               {isLoading ? "..." : "Send"}
             </Text>
           </TouchableOpacity>

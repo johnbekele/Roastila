@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTheme } from "../context/ThemeContext";
 
 const TrackShipmentTab = () => {
   const [refreshing, setRefreshing] = useState(false);
+  const { theme } = useTheme();
 
   // Mock shipment data
   const shipments = [
@@ -159,15 +161,15 @@ const TrackShipmentTab = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case "Delivered":
-        return "bg-green-500";
+        return theme.colors.success;
       case "In Transit":
-        return "bg-blue-500";
+        return theme.colors.primary;
       case "Processing":
-        return "bg-yellow-500";
+        return theme.colors.warning;
       case "Customs Clearance":
-        return "bg-purple-500";
+        return theme.colors.info;
       default:
-        return "bg-gray-500";
+        return theme.colors.textSecondary;
     }
   };
 
@@ -189,55 +191,126 @@ const TrackShipmentTab = () => {
   const ShipmentCard = ({ shipment }) => (
     <TouchableOpacity
       onPress={() => handleShipmentPress(shipment)}
-      className="bg-white rounded-xl shadow-sm mb-4 p-4 active:bg-gray-50"
+      style={{
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.borderRadius.xl,
+        shadowColor: theme.colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+        marginBottom: theme.spacing.md,
+        padding: theme.spacing.md,
+      }}
     >
       {/* Header */}
-      <View className="flex-row justify-between items-start mb-3">
-        <View className="flex-1">
-          <Text className="text-lg font-bold text-gray-800 mb-1">
+      <View style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        marginBottom: theme.spacing.sm,
+      }}>
+        <View style={{ flex: 1 }}>
+          <Text style={{
+            fontSize: theme.typography.fontSize.lg,
+            fontWeight: theme.typography.fontWeight.bold,
+            color: theme.colors.text,
+            marginBottom: theme.spacing.xs,
+          }}>
             {shipment.orderId}
           </Text>
-          <Text className="text-sm text-gray-600 mb-1">
+          <Text style={{
+            fontSize: theme.typography.fontSize.sm,
+            color: theme.colors.textSecondary,
+            marginBottom: theme.spacing.xs,
+          }}>
             {shipment.coffee} • {shipment.quantity}
           </Text>
-          <Text className="text-xs text-gray-500">
+          <Text style={{
+            fontSize: theme.typography.fontSize.xs,
+            color: theme.colors.textTertiary,
+          }}>
             Producer: {shipment.producer}
           </Text>
         </View>
         <View
-          className={`px-3 py-1 rounded-full ${getStatusColor(shipment.status)}`}
+          style={{
+            paddingHorizontal: theme.spacing.sm,
+            paddingVertical: theme.spacing.xs,
+            borderRadius: theme.borderRadius.full,
+            backgroundColor: getStatusColor(shipment.status),
+          }}
         >
-          <Text className="text-white text-xs font-semibold">
+          <Text style={{
+            color: theme.colors.textInverse,
+            fontSize: theme.typography.fontSize.xs,
+            fontWeight: theme.typography.fontWeight.semibold,
+          }}>
             {getStatusIcon(shipment.status)} {shipment.status}
           </Text>
         </View>
       </View>
 
       {/* Progress Bar */}
-      <View className="mb-3">
-        <View className="flex-row justify-between items-center mb-1">
-          <Text className="text-sm text-gray-600">Progress</Text>
-          <Text className="text-sm font-semibold text-gray-800">
+      <View style={{ marginBottom: theme.spacing.sm }}>
+        <View style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: theme.spacing.xs,
+        }}>
+          <Text style={{
+            fontSize: theme.typography.fontSize.sm,
+            color: theme.colors.textSecondary,
+          }}>Progress</Text>
+          <Text style={{
+            fontSize: theme.typography.fontSize.sm,
+            fontWeight: theme.typography.fontWeight.semibold,
+            color: theme.colors.text,
+          }}>
             {shipment.progress}%
           </Text>
         </View>
-        <View className="bg-gray-200 rounded-full h-2">
+        <View style={{
+          backgroundColor: theme.colors.backgroundSecondary,
+          borderRadius: theme.borderRadius.full,
+          height: 8,
+        }}>
           <View
-            className="bg-blue-500 h-2 rounded-full"
-            style={{ width: `${shipment.progress}%` }}
+            style={{
+              backgroundColor: theme.colors.primary,
+              height: 8,
+              borderRadius: theme.borderRadius.full,
+              width: `${shipment.progress}%`,
+            }}
           />
         </View>
       </View>
 
       {/* Current Location */}
-      <View className="flex-row items-center mb-3">
-        <Text className="text-amber-500 text-lg mr-2">📍</Text>
-        <View className="flex-1">
-          <Text className="text-sm font-medium text-gray-800">
+      <View style={{
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: theme.spacing.sm,
+      }}>
+        <Text style={{
+          color: theme.colors.secondary,
+          fontSize: theme.typography.fontSize.lg,
+          marginRight: theme.spacing.sm,
+        }}>📍</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={{
+            fontSize: theme.typography.fontSize.sm,
+            fontWeight: theme.typography.fontWeight.medium,
+            color: theme.colors.text,
+          }}>
             {shipment.currentLocation}
           </Text>
           {shipment.nextLocation && shipment.nextLocation !== "N/A" && (
-            <Text className="text-xs text-gray-500">
+            <Text style={{
+              fontSize: theme.typography.fontSize.xs,
+              color: theme.colors.textTertiary,
+            }}>
               Next: {shipment.nextLocation}
             </Text>
           )}
@@ -245,18 +318,39 @@ const TrackShipmentTab = () => {
       </View>
 
       {/* Timeline Preview */}
-      <View className="border-t border-gray-100 pt-3">
-        <Text className="text-sm font-medium text-gray-700 mb-2">
+      <View style={{
+        borderTopWidth: 1,
+        borderTopColor: theme.colors.border,
+        paddingTop: theme.spacing.sm,
+      }}>
+        <Text style={{
+          fontSize: theme.typography.fontSize.sm,
+          fontWeight: theme.typography.fontWeight.medium,
+          color: theme.colors.text,
+          marginBottom: theme.spacing.sm,
+        }}>
           Recent Updates
         </Text>
         {shipment.timeline.slice(-2).map((event, index) => (
-          <View key={index} className="flex-row items-center mb-1">
+          <View key={index} style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: theme.spacing.xs,
+          }}>
             <Text
-              className={`text-xs mr-2 ${event.completed ? "text-green-500" : "text-gray-400"}`}
+              style={{
+                fontSize: theme.typography.fontSize.xs,
+                marginRight: theme.spacing.sm,
+                color: event.completed ? theme.colors.success : theme.colors.textTertiary,
+              }}
             >
               {event.completed ? "✓" : "○"}
             </Text>
-            <Text className="text-xs text-gray-600 flex-1">
+            <Text style={{
+              fontSize: theme.typography.fontSize.xs,
+              color: theme.colors.textSecondary,
+              flex: 1,
+            }}>
               {event.status} - {event.date}
             </Text>
           </View>
@@ -264,16 +358,38 @@ const TrackShipmentTab = () => {
       </View>
 
       {/* Tracking Info */}
-      <View className="flex-row justify-between items-center mt-3 pt-3 border-t border-gray-100">
+      <View style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginTop: theme.spacing.sm,
+        paddingTop: theme.spacing.sm,
+        borderTopWidth: 1,
+        borderTopColor: theme.colors.border,
+      }}>
         <View>
-          <Text className="text-xs text-gray-500">Tracking Number</Text>
-          <Text className="text-sm font-mono text-gray-800">
+          <Text style={{
+            fontSize: theme.typography.fontSize.xs,
+            color: theme.colors.textTertiary,
+          }}>Tracking Number</Text>
+          <Text style={{
+            fontSize: theme.typography.fontSize.sm,
+            fontFamily: "monospace",
+            color: theme.colors.text,
+          }}>
             {shipment.trackingNumber}
           </Text>
         </View>
-        <View className="items-end">
-          <Text className="text-xs text-gray-500">Est. Delivery</Text>
-          <Text className="text-sm font-semibold text-gray-800">
+        <View style={{ alignItems: "flex-end" }}>
+          <Text style={{
+            fontSize: theme.typography.fontSize.xs,
+            color: theme.colors.textTertiary,
+          }}>Est. Delivery</Text>
+          <Text style={{
+            fontSize: theme.typography.fontSize.sm,
+            fontWeight: theme.typography.fontWeight.semibold,
+            color: theme.colors.text,
+          }}>
             {shipment.estimatedDelivery}
           </Text>
         </View>
@@ -282,23 +398,66 @@ const TrackShipmentTab = () => {
   );
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}>
       {/* Header */}
-      <View className="bg-white px-6 py-4 shadow-sm">
-        <Text className="text-2xl font-bold text-gray-800 mb-1">
+      <View style={{
+        backgroundColor: theme.colors.surface,
+        paddingHorizontal: theme.spacing.md,
+        paddingVertical: theme.spacing.md,
+        shadowColor: theme.colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+      }}>
+        <Text style={{
+          fontSize: theme.typography.fontSize.xl,
+          fontWeight: theme.typography.fontWeight.bold,
+          color: theme.colors.text,
+          marginBottom: theme.spacing.xs,
+        }}>
           Track Shipments
         </Text>
-        <Text className="text-gray-600">
+        <Text style={{
+          color: theme.colors.textSecondary,
+        }}>
           Monitor your coffee orders in real-time
         </Text>
       </View>
 
       {/* Search Bar */}
-      <View className="px-4 pt-4">
-        <View className="bg-white rounded-xl shadow-sm p-4">
-          <View className="flex-row items-center bg-gray-50 rounded-lg px-4 py-3">
-            <Text className="text-gray-400 text-lg mr-3">🔍</Text>
-            <Text className="flex-1 text-gray-800 text-base">
+      <View style={{
+        paddingHorizontal: theme.spacing.md,
+        paddingTop: theme.spacing.md,
+      }}>
+        <View style={{
+          backgroundColor: theme.colors.surface,
+          borderRadius: theme.borderRadius.xl,
+          shadowColor: theme.colors.shadow,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+          padding: theme.spacing.md,
+        }}>
+          <View style={{
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: theme.colors.backgroundSecondary,
+            borderRadius: theme.borderRadius.lg,
+            paddingHorizontal: theme.spacing.md,
+            paddingVertical: theme.spacing.sm,
+          }}>
+            <Text style={{
+              color: theme.colors.textTertiary,
+              fontSize: theme.typography.fontSize.lg,
+              marginRight: theme.spacing.sm,
+            }}>🔍</Text>
+            <Text style={{
+              flex: 1,
+              color: theme.colors.text,
+              fontSize: theme.typography.fontSize.base,
+            }}>
               Search by order ID or tracking number...
             </Text>
           </View>
@@ -306,16 +465,33 @@ const TrackShipmentTab = () => {
       </View>
 
       {/* Filter Options */}
-      <View className="px-4 pt-4">
+      <View style={{
+        paddingHorizontal: theme.spacing.md,
+        paddingTop: theme.spacing.md,
+      }}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View className="flex-row space-x-2">
+          <View style={{ flexDirection: "row", gap: theme.spacing.sm }}>
             {["All", "In Transit", "Delivered", "Processing", "Customs"].map(
               (filter) => (
                 <TouchableOpacity
                   key={filter}
-                  className="bg-white px-4 py-2 rounded-full shadow-sm active:bg-purple-100"
+                  style={{
+                    backgroundColor: theme.colors.surface,
+                    paddingHorizontal: theme.spacing.md,
+                    paddingVertical: theme.spacing.sm,
+                    borderRadius: theme.borderRadius.full,
+                    shadowColor: theme.colors.shadow,
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 2,
+                    elevation: 2,
+                  }}
                 >
-                  <Text className="text-sm font-medium text-gray-700">
+                  <Text style={{
+                    fontSize: theme.typography.fontSize.sm,
+                    fontWeight: theme.typography.fontWeight.medium,
+                    color: theme.colors.text,
+                  }}>
                     {filter}
                   </Text>
                 </TouchableOpacity>
@@ -327,19 +503,31 @@ const TrackShipmentTab = () => {
 
       {/* Shipments List */}
       <ScrollView
-        className="flex-1 px-4 pt-4"
+        style={{
+          flex: 1,
+          paddingHorizontal: theme.spacing.md,
+          paddingTop: theme.spacing.md,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={["#8B5CF6"]}
-            tintColor="#8B5CF6"
+            colors={[theme.colors.info]}
+            tintColor={theme.colors.info}
           />
         }
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-sm text-gray-600">
+        <View style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: theme.spacing.md,
+        }}>
+          <Text style={{
+            fontSize: theme.typography.fontSize.sm,
+            color: theme.colors.textSecondary,
+          }}>
             {shipments.length} active shipments
           </Text>
         </View>
@@ -349,12 +537,22 @@ const TrackShipmentTab = () => {
         ))}
 
         {/* Add New Tracking */}
-        <View className="py-6">
+        <View style={{ paddingVertical: theme.spacing.md }}>
           <TouchableOpacity
-            className="bg-white border border-purple-500 py-3 rounded-lg"
+            style={{
+              backgroundColor: theme.colors.surface,
+              borderWidth: 1,
+              borderColor: theme.colors.info,
+              paddingVertical: theme.spacing.sm,
+              borderRadius: theme.borderRadius.lg,
+            }}
             onPress={() => console.log("Add tracking")}
           >
-            <Text className="text-purple-600 font-semibold text-center">
+            <Text style={{
+              color: theme.colors.info,
+              fontWeight: theme.typography.fontWeight.semibold,
+              textAlign: "center",
+            }}>
               + Add New Tracking Number
             </Text>
           </TouchableOpacity>

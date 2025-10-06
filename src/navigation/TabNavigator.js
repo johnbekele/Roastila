@@ -2,6 +2,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../hooks/useAuth";
 
 // Screens
@@ -15,19 +16,54 @@ const Tab = createBottomTabNavigator();
 // Custom Header Component
 function CustomHeader({ navigation }) {
   const { user } = useAuth();
+  const { theme } = useTheme();
 
   return (
-    <SafeAreaView edges={["top"]} className="bg-white">
-      <View className="border-b border-gray-200 px-4 py-3 flex-row items-center justify-between">
+    <SafeAreaView
+      edges={["top"]}
+      style={{ backgroundColor: theme.colors.surface }}
+    >
+      <View
+        style={{
+          borderBottomWidth: 1,
+          borderBottomColor: theme.colors.border,
+          paddingHorizontal: theme.spacing.md,
+          paddingVertical: theme.spacing.sm,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text className="text-xl font-bold text-gray-800">Roastila ☕</Text>
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.xl,
+              fontWeight: theme.typography.fontWeight.bold,
+              color: theme.colors.text,
+            }}
+          >
+            Roastila ☕
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => navigation.openDrawer()}
-          className="w-10 h-10 bg-blue-500 rounded-full items-center justify-center"
+          style={{
+            width: 40,
+            height: 40,
+            backgroundColor: theme.colors.primary,
+            borderRadius: theme.borderRadius.full,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
-          <Text className="text-white text-lg font-bold">
+          <Text
+            style={{
+              color: theme.colors.textInverse,
+              fontSize: theme.typography.fontSize.lg,
+              fontWeight: theme.typography.fontWeight.bold,
+            }}
+          >
             {user?.first_name?.charAt(0)?.toUpperCase() ||
               user?.username?.charAt(0)?.toUpperCase() ||
               "U"}
@@ -39,41 +75,54 @@ function CustomHeader({ navigation }) {
 }
 
 function TabNavigator() {
+  const { theme, themeMode } = useTheme();
+
+  const screenOptions = {
+    headerShown: true,
+    header: ({ navigation }) => <CustomHeader navigation={navigation} />,
+    tabBarStyle: {
+      backgroundColor: theme.colors.surface,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+      paddingBottom: 5,
+      paddingTop: 5,
+      height: 60,
+    },
+    tabBarActiveTintColor: theme.colors.primary,
+    tabBarInactiveTintColor: theme.colors.textSecondary,
+    tabBarLabelStyle: {
+      fontSize: 12,
+      fontWeight: "600",
+    },
+  };
+
   return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: true,
-        header: ({ navigation }) => <CustomHeader navigation={navigation} />,
-        tabBarStyle: {
-          backgroundColor: "#ffffff",
-          borderTopWidth: 1,
-          borderTopColor: "#e5e7eb",
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
-        },
-        tabBarActiveTintColor: "#3b82f6",
-        tabBarInactiveTintColor: "#6b7280",
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "600",
-        },
-      }}
-    >
+    <Tab.Navigator key={themeMode} screenOptions={screenOptions}>
       <Tab.Screen
         name="Home"
         component={HomeScreen}
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`text-xs font-semibold ${focused ? "text-blue-500" : "text-gray-500"}`}
+              style={{
+                fontSize: theme.typography.fontSize.xs,
+                fontWeight: theme.typography.fontWeight.semibold,
+                color: focused
+                  ? theme.colors.primary
+                  : theme.colors.textSecondary,
+              }}
             >
               Home
             </Text>
           ),
           tabBarIcon: ({ focused }) => (
             <Text
-              className={`text-xl ${focused ? "text-blue-500" : "text-gray-500"}`}
+              style={{
+                fontSize: theme.typography.fontSize.xl,
+                color: focused
+                  ? theme.colors.primary
+                  : theme.colors.textSecondary,
+              }}
             >
               🏠
             </Text>
@@ -86,14 +135,25 @@ function TabNavigator() {
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`text-xs font-semibold ${focused ? "text-blue-500" : "text-gray-500"}`}
+              style={{
+                fontSize: theme.typography.fontSize.xs,
+                fontWeight: theme.typography.fontWeight.semibold,
+                color: focused
+                  ? theme.colors.primary
+                  : theme.colors.textSecondary,
+              }}
             >
               Browse
             </Text>
           ),
           tabBarIcon: ({ focused }) => (
             <Text
-              className={`text-xl ${focused ? "text-blue-500" : "text-gray-500"}`}
+              style={{
+                fontSize: theme.typography.fontSize.xl,
+                color: focused
+                  ? theme.colors.primary
+                  : theme.colors.textSecondary,
+              }}
             >
               ☕
             </Text>
@@ -106,14 +166,25 @@ function TabNavigator() {
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`text-xs font-semibold ${focused ? "text-blue-500" : "text-gray-500"}`}
+              style={{
+                fontSize: theme.typography.fontSize.xs,
+                fontWeight: theme.typography.fontWeight.semibold,
+                color: focused
+                  ? theme.colors.primary
+                  : theme.colors.textSecondary,
+              }}
             >
               Profile
             </Text>
           ),
           tabBarIcon: ({ focused }) => (
             <Text
-              className={`text-xl ${focused ? "text-blue-500" : "text-gray-500"}`}
+              style={{
+                fontSize: theme.typography.fontSize.xl,
+                color: focused
+                  ? theme.colors.primary
+                  : theme.colors.textSecondary,
+              }}
             >
               👤
             </Text>
@@ -126,14 +197,25 @@ function TabNavigator() {
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`text-xs font-semibold ${focused ? "text-blue-500" : "text-gray-500"}`}
+              style={{
+                fontSize: theme.typography.fontSize.xs,
+                fontWeight: theme.typography.fontWeight.semibold,
+                color: focused
+                  ? theme.colors.primary
+                  : theme.colors.textSecondary,
+              }}
             >
               Chat
             </Text>
           ),
           tabBarIcon: ({ focused }) => (
             <Text
-              className={`text-xl ${focused ? "text-blue-500" : "text-gray-500"}`}
+              style={{
+                fontSize: theme.typography.fontSize.xl,
+                color: focused
+                  ? theme.colors.primary
+                  : theme.colors.textSecondary,
+              }}
             >
               💬
             </Text>

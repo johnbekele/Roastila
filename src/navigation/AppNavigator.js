@@ -9,6 +9,8 @@ import { AuthContext } from "../hooks/AuthContext";
 import DrawerNavigator from "./DrawerNavigator";
 
 // Screens
+import CreateAccountScreen from "../screens/CreateAccountScreen";
+import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import LoginScreen from "../screens/LoginScreen";
 
 const Stack = createNativeStackNavigator();
@@ -34,8 +36,15 @@ function AppNavigator() {
         // User is authenticated - show Drawer Navigator
         <Stack.Screen name="Main" component={DrawerNavigator} />
       ) : (
-        // User is not authenticated - show Login screen
-        <Stack.Screen name="Login" component={LoginScreen} />
+        // User is not authenticated - show authentication screens
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
+          <Stack.Screen
+            name="ForgotPassword"
+            component={ForgotPasswordScreen}
+          />
+        </>
       )}
     </Stack.Navigator>
   );

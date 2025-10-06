@@ -8,11 +8,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTheme } from "../context/ThemeContext";
 
 const PlaceOrderTab = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCoffees, setSelectedCoffees] = useState([]);
   const [orderNotes, setOrderNotes] = useState("");
+  const { theme } = useTheme();
 
   // Mock coffee selection data
   const availableCoffees = [
@@ -108,29 +110,86 @@ const PlaceOrderTab = () => {
   };
 
   const CoffeeSelectionCard = ({ coffee }) => (
-    <View className="bg-white rounded-xl shadow-sm mb-3 p-4">
-      <View className="flex-row justify-between items-start mb-2">
-        <View className="flex-1">
-          <Text className="text-lg font-bold text-gray-800 mb-1">
+    <View
+      style={{
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.borderRadius.xl,
+        shadowColor: theme.colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+        marginBottom: theme.spacing.sm,
+        padding: theme.spacing.md,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          marginBottom: theme.spacing.sm,
+        }}
+      >
+        <View style={{ flex: 1 }}>
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.lg,
+              fontWeight: theme.typography.fontWeight.bold,
+              color: theme.colors.text,
+              marginBottom: theme.spacing.xs,
+            }}
+          >
             {coffee.name}
           </Text>
-          <Text className="text-sm text-gray-600 mb-1">
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.sm,
+              color: theme.colors.textSecondary,
+              marginBottom: theme.spacing.xs,
+            }}
+          >
             {coffee.origin} • {coffee.producer}
           </Text>
-          <Text className="text-sm text-gray-500">
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.sm,
+              color: theme.colors.textTertiary,
+            }}
+          >
             Available: {coffee.quantity}kg • Min: {coffee.minOrder}kg
           </Text>
         </View>
-        <View className="items-end">
-          <Text className="text-lg font-bold text-amber-600">
+        <View style={{ alignItems: "flex-end" }}>
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.lg,
+              fontWeight: theme.typography.fontWeight.bold,
+              color: theme.colors.secondary,
+            }}
+          >
             {coffee.price}
           </Text>
-          <Text className="text-xs text-gray-500">{coffee.unit}</Text>
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.xs,
+              color: theme.colors.textTertiary,
+            }}
+          >
+            {coffee.unit}
+          </Text>
         </View>
       </View>
 
-      <View className="flex-row items-center justify-between mt-3">
-        <View className="flex-row items-center">
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop: theme.spacing.sm,
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <TouchableOpacity
             onPress={() =>
               handleUpdateQuantity(
@@ -139,11 +198,32 @@ const PlaceOrderTab = () => {
                   ?.quantity || 0) - 1
               )
             }
-            className="bg-gray-200 w-8 h-8 rounded-full items-center justify-center"
+            style={{
+              backgroundColor: theme.colors.backgroundSecondary,
+              width: 32,
+              height: 32,
+              borderRadius: theme.borderRadius.full,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <Text className="text-gray-600 font-bold">-</Text>
+            <Text
+              style={{
+                color: theme.colors.textSecondary,
+                fontWeight: theme.typography.fontWeight.bold,
+              }}
+            >
+              -
+            </Text>
           </TouchableOpacity>
-          <Text className="mx-4 text-lg font-semibold">
+          <Text
+            style={{
+              marginHorizontal: theme.spacing.md,
+              fontSize: theme.typography.fontSize.lg,
+              fontWeight: theme.typography.fontWeight.semibold,
+              color: theme.colors.text,
+            }}
+          >
             {selectedCoffees.find((item) => item.id === coffee.id)?.quantity ||
               0}
           </Text>
@@ -155,16 +235,43 @@ const PlaceOrderTab = () => {
                   ?.quantity || 0) + 1
               )
             }
-            className="bg-amber-500 w-8 h-8 rounded-full items-center justify-center"
+            style={{
+              backgroundColor: theme.colors.secondary,
+              width: 32,
+              height: 32,
+              borderRadius: theme.borderRadius.full,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <Text className="text-white font-bold">+</Text>
+            <Text
+              style={{
+                color: theme.colors.textInverse,
+                fontWeight: theme.typography.fontWeight.bold,
+              }}
+            >
+              +
+            </Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity
           onPress={() => handleAddToOrder(coffee)}
-          className="bg-blue-500 px-4 py-2 rounded-lg active:bg-blue-600"
+          style={{
+            backgroundColor: theme.colors.primary,
+            paddingHorizontal: theme.spacing.md,
+            paddingVertical: theme.spacing.sm,
+            borderRadius: theme.borderRadius.lg,
+          }}
         >
-          <Text className="text-white font-semibold text-sm">Add to Order</Text>
+          <Text
+            style={{
+              color: theme.colors.textInverse,
+              fontWeight: theme.typography.fontWeight.semibold,
+              fontSize: theme.typography.fontSize.sm,
+            }}
+          >
+            Add to Order
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -173,12 +280,43 @@ const PlaceOrderTab = () => {
   const OrderSummaryCard = () => {
     if (selectedCoffees.length === 0) {
       return (
-        <View className="bg-white rounded-xl shadow-sm p-6 items-center">
-          <Text className="text-4xl mb-2">📦</Text>
-          <Text className="text-lg font-semibold text-gray-800 mb-2">
+        <View
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderRadius: theme.borderRadius.xl,
+            shadowColor: theme.colors.shadow,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+            padding: theme.spacing.md,
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 40,
+              marginBottom: theme.spacing.sm,
+            }}
+          >
+            📦
+          </Text>
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.lg,
+              fontWeight: theme.typography.fontWeight.semibold,
+              color: theme.colors.text,
+              marginBottom: theme.spacing.sm,
+            }}
+          >
             No items in order
           </Text>
-          <Text className="text-gray-600 text-center">
+          <Text
+            style={{
+              color: theme.colors.textSecondary,
+              textAlign: "center",
+            }}
+          >
             Add coffees from the list below to create your order
           </Text>
         </View>
@@ -186,23 +324,67 @@ const PlaceOrderTab = () => {
     }
 
     return (
-      <View className="bg-white rounded-xl shadow-sm p-4 mb-4">
-        <Text className="text-lg font-bold text-gray-800 mb-3">
+      <View
+        style={{
+          backgroundColor: theme.colors.surface,
+          borderRadius: theme.borderRadius.xl,
+          shadowColor: theme.colors.shadow,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+          padding: theme.spacing.md,
+          marginBottom: theme.spacing.md,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: theme.typography.fontSize.lg,
+            fontWeight: theme.typography.fontWeight.bold,
+            color: theme.colors.text,
+            marginBottom: theme.spacing.sm,
+          }}
+        >
           Order Summary
         </Text>
         {selectedCoffees.map((item) => (
           <View
             key={item.id}
-            className="flex-row justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              paddingVertical: theme.spacing.sm,
+              borderBottomWidth: 1,
+              borderBottomColor: theme.colors.border,
+            }}
           >
-            <View className="flex-1">
-              <Text className="font-medium text-gray-800">{item.name}</Text>
-              <Text className="text-sm text-gray-600">
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontWeight: theme.typography.fontWeight.medium,
+                  color: theme.colors.text,
+                }}
+              >
+                {item.name}
+              </Text>
+              <Text
+                style={{
+                  fontSize: theme.typography.fontSize.sm,
+                  color: theme.colors.textSecondary,
+                }}
+              >
                 {item.quantity}kg × {item.price}
               </Text>
             </View>
-            <View className="flex-row items-center">
-              <Text className="font-semibold text-gray-800 mr-3">
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text
+                style={{
+                  fontWeight: theme.typography.fontWeight.semibold,
+                  color: theme.colors.text,
+                  marginRight: theme.spacing.sm,
+                }}
+              >
                 €
                 {(
                   parseFloat(item.price.replace("€", "")) * item.quantity
@@ -210,16 +392,51 @@ const PlaceOrderTab = () => {
               </Text>
               <TouchableOpacity
                 onPress={() => handleRemoveFromOrder(item.id)}
-                className="bg-red-100 p-1 rounded-full"
+                style={{
+                  backgroundColor: theme.colors.errorLight,
+                  padding: theme.spacing.xs,
+                  borderRadius: theme.borderRadius.full,
+                }}
               >
-                <Text className="text-red-600 text-xs">✕</Text>
+                <Text
+                  style={{
+                    color: theme.colors.error,
+                    fontSize: theme.typography.fontSize.xs,
+                  }}
+                >
+                  ✕
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         ))}
-        <View className="flex-row justify-between items-center pt-3 mt-3 border-t border-gray-200">
-          <Text className="text-lg font-bold text-gray-800">Total</Text>
-          <Text className="text-xl font-bold text-amber-600">
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingTop: theme.spacing.sm,
+            marginTop: theme.spacing.sm,
+            borderTopWidth: 1,
+            borderTopColor: theme.colors.border,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.lg,
+              fontWeight: theme.typography.fontWeight.bold,
+              color: theme.colors.text,
+            }}
+          >
+            Total
+          </Text>
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.xl,
+              fontWeight: theme.typography.fontWeight.bold,
+              color: theme.colors.secondary,
+            }}
+          >
             €{calculateTotal().toFixed(2)}
           </Text>
         </View>
@@ -228,23 +445,53 @@ const PlaceOrderTab = () => {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View
+      style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}
+    >
       {/* Header */}
-      <View className="bg-white px-6 py-4 shadow-sm">
-        <Text className="text-2xl font-bold text-gray-800 mb-1">
+      <View
+        style={{
+          backgroundColor: theme.colors.surface,
+          paddingHorizontal: theme.spacing.md,
+          paddingVertical: theme.spacing.md,
+          shadowColor: theme.colors.shadow,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: theme.typography.fontSize.xl,
+            fontWeight: theme.typography.fontWeight.bold,
+            color: theme.colors.text,
+            marginBottom: theme.spacing.xs,
+          }}
+        >
           Place Order
         </Text>
-        <Text className="text-gray-600">Create a new coffee order inquiry</Text>
+        <Text
+          style={{
+            color: theme.colors.textSecondary,
+          }}
+        >
+          Create a new coffee order inquiry
+        </Text>
       </View>
 
       <ScrollView
-        className="flex-1 px-4 pt-4"
+        style={{
+          flex: 1,
+          paddingHorizontal: theme.spacing.md,
+          paddingTop: theme.spacing.md,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={["#3B82F6"]}
-            tintColor="#3B82F6"
+            colors={[theme.colors.primary]}
+            tintColor={theme.colors.primary}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -253,13 +500,39 @@ const PlaceOrderTab = () => {
         <OrderSummaryCard />
 
         {/* Order Notes */}
-        <View className="bg-white rounded-xl shadow-sm p-4 mb-4">
-          <Text className="text-lg font-bold text-gray-800 mb-3">
+        <View
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderRadius: theme.borderRadius.xl,
+            shadowColor: theme.colors.shadow,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+            padding: theme.spacing.md,
+            marginBottom: theme.spacing.md,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.lg,
+              fontWeight: theme.typography.fontWeight.bold,
+              color: theme.colors.text,
+              marginBottom: theme.spacing.sm,
+            }}
+          >
             Order Notes
           </Text>
           <TextInput
-            className="bg-gray-50 rounded-lg p-3 text-gray-800"
+            style={{
+              backgroundColor: theme.colors.backgroundSecondary,
+              borderRadius: theme.borderRadius.lg,
+              padding: theme.spacing.sm,
+              color: theme.colors.text,
+              fontSize: theme.typography.fontSize.sm,
+            }}
             placeholder="Add any special requirements or notes..."
+            placeholderTextColor={theme.colors.textTertiary}
             value={orderNotes}
             onChangeText={setOrderNotes}
             multiline
@@ -268,8 +541,15 @@ const PlaceOrderTab = () => {
         </View>
 
         {/* Available Coffees */}
-        <View className="mb-4">
-          <Text className="text-lg font-bold text-gray-800 mb-3">
+        <View style={{ marginBottom: theme.spacing.md }}>
+          <Text
+            style={{
+              fontSize: theme.typography.fontSize.lg,
+              fontWeight: theme.typography.fontWeight.bold,
+              color: theme.colors.text,
+              marginBottom: theme.spacing.sm,
+            }}
+          >
             Available Coffees
           </Text>
           {availableCoffees.map((coffee) => (
@@ -279,12 +559,23 @@ const PlaceOrderTab = () => {
 
         {/* Place Order Button */}
         {selectedCoffees.length > 0 && (
-          <View className="pb-6">
+          <View style={{ paddingBottom: theme.spacing.md }}>
             <TouchableOpacity
               onPress={handlePlaceOrder}
-              className="bg-blue-500 py-4 rounded-xl active:bg-blue-600"
+              style={{
+                backgroundColor: theme.colors.primary,
+                paddingVertical: theme.spacing.md,
+                borderRadius: theme.borderRadius.xl,
+              }}
             >
-              <Text className="text-white font-bold text-lg text-center">
+              <Text
+                style={{
+                  color: theme.colors.textInverse,
+                  fontWeight: theme.typography.fontWeight.bold,
+                  fontSize: theme.typography.fontSize.lg,
+                  textAlign: "center",
+                }}
+              >
                 Place Order - €{calculateTotal().toFixed(2)}
               </Text>
             </TouchableOpacity>

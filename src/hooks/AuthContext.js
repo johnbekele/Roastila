@@ -1,8 +1,7 @@
 // src/context/AuthContext.js
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
 import { createContext, useEffect, useState } from "react";
-import { API_URL } from "../config/EnvConfig";
+import apiClient from "../config/axiosConfig";
 
 export const AuthContext = createContext();
 
@@ -22,9 +21,8 @@ export const AuthProvider = ({ children }) => {
         if (storedToken && storedUser) {
           setToken(storedToken);
           setUser(JSON.parse(storedUser));
+          console.log("User Info from storage:", JSON.parse(storedUser));
         }
-
-        console.log("User Info from storage:", user);
       } catch (err) {
         console.error("Failed to load auth:", err);
       }
@@ -38,12 +36,16 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
+      // Check if we have valid credentials
+      if (!googleUserData && (!email || !password)) {
+        throw new Error("Email and password are required");
+      }
       let response;
 
       if (googleUserData) {
         // Google Sign-In flow
         console.log("🔐 [AUTH] Processing Google Sign-In");
-        response = await axios.post(`${API_URL}/auth/google-login`, {
+        response = await apiClient.post("auth/google-login", {
           id_token: googleUserData.id_token,
           access_token: googleUserData.access_token,
           email: googleUserData.email,
@@ -55,18 +57,27 @@ export const AuthProvider = ({ children }) => {
       } else {
         // Regular email/password login
         console.log("🔐 [AUTH] Processing regular login");
-        response = await axios.post(`${API_URL}/auth/login`, {
+        response = await apiClient.post("auth/login", {
           email,
           password,
         });
       }
 
-      const { token: authToken, user: userData } = response.data;
+      const {
+        token: authToken,
+        user: userData,
+        token_type,
+        expires_at,
+      } = response.data;
       console.log("✅ [AUTH] Login successful, user data:", userData);
+      console.log("✅ [AUTH] Token type:", token_type);
+      console.log("✅ [AUTH] Expires at:", expires_at);
 
       // Store authentication data
       await AsyncStorage.setItem("token", authToken);
       await AsyncStorage.setItem("user", JSON.stringify(userData));
+      await AsyncStorage.setItem("token_type", token_type);
+      await AsyncStorage.setItem("expires_at", expires_at);
 
       setToken(authToken);
       setUser(userData);
@@ -77,10 +88,26 @@ export const AuthProvider = ({ children }) => {
         "❌ [AUTH] Login error:",
         err.response?.data || err.message
       );
-      const errorMessage =
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        "Login failed";
+
+      let errorMessage = "Login failed";
+
+      if (err.code === "ECONNABORTED") {
+        errorMessage =
+          "Request timeout - please check your internet connection";
+      } else if (err.message === "Network Error") {
+        errorMessage = "Network error - please check your internet connection";
+      } else if (err.response?.status === 401) {
+        errorMessage = "Invalid email or password";
+      } else if (err.response?.status === 500) {
+        errorMessage = "Server error - please try again later";
+      } else if (err.response?.data?.detail) {
+        errorMessage = err.response.data.detail;
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -98,6 +125,8 @@ export const AuthProvider = ({ children }) => {
     console.log("🚪 [AUTH] Logging out user");
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("user");
+    await AsyncStorage.removeItem("token_type");
+    await AsyncStorage.removeItem("expires_at");
     setToken(null);
     setUser(null);
     console.log("✅ [AUTH] User logged out successfully");
